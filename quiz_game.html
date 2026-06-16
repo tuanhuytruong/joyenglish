@@ -1,0 +1,2652 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Settings - Boss Battle PVP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    colors: { edKem: '#FFFBF0', edVang: '#F6C90E', edVangHover: '#DDAA00', edNavy: '#1E3A8A', edNavyLight: '#2563EB', edXanhRing: '#3B82F6' },
+                    boxShadow: { 'ed': '0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06)' }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="font-sans">
+
+    <div id="game-aspect-wrapper">
+        <div id="debug-grid" class="hidden absolute inset-0 z-[999] pointer-events-none grid grid-cols-[repeat(16,1fr)] grid-rows-[repeat(9,1fr)] bg-black/20"></div>
+        <div id="dynamic-bg-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-[0] overflow-hidden" style="opacity: 0.4;"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-screen pointer-events-none z-[1]"></div>
+
+        <!-- ========================================== -->
+        <!-- QUIZ BOARD - ĐÁP ÁN -->
+        <!-- ========================================== -->
+        <div id="answers-container" class="absolute z-30 grid grid-cols-4 gap-6 pointer-events-auto transition-all duration-300 transform origin-center" style="left: 9.375%; width: 84.375%; top: 2.5%; height: 28%;">
+            
+            <div class="bg-red-200 rounded-3xl border-[14px] border-red-600 border-b-[16px] border-b-red-800 relative overflow-visible h-full shadow-xl flex items-center justify-center p-0 transition-all active:border-b-[8px] active:translate-y-2 group">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-red-900 border-[4px] border-white text-white font-black text-2xl w-14 h-12 flex items-center justify-center rounded-xl shadow-lg z-30 transform -rotate-6 pointer-events-none">1</div>
+                
+                <button onclick="triggerClickAnswer('p1', 0)" class="absolute left-[-15px] top-[-15px] bg-gradient-to-br from-cyan-400 to-blue-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_cyan] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p1-1" class="text-lg drop-shadow-md">A</span>
+                </button>
+
+                <button onclick="triggerClickAnswer('p2', 0)" class="absolute right-[-15px] bottom-[-15px] bg-gradient-to-br from-orange-400 to-red-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_orange] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p2-1" class="text-lg drop-shadow-md">H</span>
+                </button>
+                
+                <div id="overlay-ans-1" class="hidden absolute inset-0 z-40 bg-black/50 rounded-[14px] flex items-center justify-center backdrop-blur-[2px] pointer-events-none">
+                    <div id="icon-ans-1" class="scale-0 transition-transform duration-300"></div>
+                </div>
+                <div class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center p-4 z-10 relative pointer-events-none">
+                    <span class="text-3xl xl:text-4xl font-black text-red-950 text-center leading-tight w-full flex items-center justify-center">Option 1</span>
+                </div>
+            </div>
+            
+            <div class="bg-blue-200 rounded-3xl border-[14px] border-blue-600 border-b-[16px] border-b-blue-800 relative overflow-visible h-full shadow-xl flex items-center justify-center p-0 transition-all active:border-b-[8px] active:translate-y-2 group">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-blue-900 border-[4px] border-white text-white font-black text-2xl w-14 h-12 flex items-center justify-center rounded-xl shadow-lg z-30 transform rotate-6 pointer-events-none">2</div>
+                
+                <button onclick="triggerClickAnswer('p1', 1)" class="absolute left-[-15px] top-[-15px] bg-gradient-to-br from-cyan-400 to-blue-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_cyan] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p1-2" class="text-lg drop-shadow-md">S</span>
+                </button>
+
+                <button onclick="triggerClickAnswer('p2', 1)" class="absolute right-[-15px] bottom-[-15px] bg-gradient-to-br from-orange-400 to-red-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_orange] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p2-2" class="text-lg drop-shadow-md">J</span>
+                </button>
+                
+                <div id="overlay-ans-2" class="hidden absolute inset-0 z-40 bg-black/50 rounded-[14px] flex items-center justify-center backdrop-blur-[2px] pointer-events-none">
+                    <div id="icon-ans-2" class="scale-0 transition-transform duration-300"></div>
+                </div>
+                <div class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center p-4 z-10 relative pointer-events-none">
+                    <span class="text-3xl xl:text-4xl font-black text-blue-950 text-center leading-tight w-full flex items-center justify-center">Option 2</span>
+                </div>
+            </div>
+            
+            <div class="bg-yellow-200 rounded-3xl border-[14px] border-yellow-500 border-b-[16px] border-b-yellow-700 relative overflow-visible h-full shadow-xl flex items-center justify-center p-0 transition-all active:border-b-[8px] active:translate-y-2 group">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-yellow-700 border-[4px] border-white text-white font-black text-2xl w-14 h-12 flex items-center justify-center rounded-xl shadow-lg z-30 transform -rotate-6 pointer-events-none">3</div>
+                
+                <button onclick="triggerClickAnswer('p1', 2)" class="absolute left-[-15px] top-[-15px] bg-gradient-to-br from-cyan-400 to-blue-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_cyan] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p1-3" class="text-lg drop-shadow-md">D</span>
+                </button>
+
+                <button onclick="triggerClickAnswer('p2', 2)" class="absolute right-[-15px] bottom-[-15px] bg-gradient-to-br from-orange-400 to-red-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_orange] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p2-3" class="text-lg drop-shadow-md">K</span>
+                </button>
+                
+                <div id="overlay-ans-3" class="hidden absolute inset-0 z-40 bg-black/50 rounded-[14px] flex items-center justify-center backdrop-blur-[2px] pointer-events-none">
+                    <div id="icon-ans-3" class="scale-0 transition-transform duration-300"></div>
+                </div>
+                <div class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center p-4 z-10 relative pointer-events-none">
+                    <span class="text-3xl xl:text-4xl font-black text-yellow-950 text-center leading-tight w-full flex items-center justify-center">Option 3</span>
+                </div>
+            </div>
+            
+            <div class="bg-green-200 rounded-3xl border-[14px] border-green-600 border-b-[16px] border-b-green-800 relative overflow-visible h-full shadow-xl flex items-center justify-center p-0 transition-all active:border-b-[8px] active:translate-y-2 group">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-green-900 border-[4px] border-white text-white font-black text-2xl w-14 h-12 flex items-center justify-center rounded-xl shadow-lg z-30 transform rotate-6 pointer-events-none">4</div>
+                
+                <button onclick="triggerClickAnswer('p1', 3)" class="absolute left-[-15px] top-[-15px] bg-gradient-to-br from-cyan-400 to-blue-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_cyan] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p1-4" class="text-lg drop-shadow-md">F</span>
+                </button>
+
+                <button onclick="triggerClickAnswer('p2', 3)" class="absolute right-[-15px] bottom-[-15px] bg-gradient-to-br from-orange-400 to-red-600 text-white font-black w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_15px_orange] border-[4px] border-white z-50 hover:scale-110 active:scale-95 transition-all cursor-pointer focus:outline-none">
+                    <span id="ui-ans-p2-4" class="text-lg drop-shadow-md">L</span>
+                </button>
+                
+                <div id="overlay-ans-4" class="hidden absolute inset-0 z-40 bg-black/50 rounded-[14px] flex items-center justify-center backdrop-blur-[2px] pointer-events-none">
+                    <div id="icon-ans-4" class="scale-0 transition-transform duration-300"></div>
+                </div>
+                <div class="w-full h-full rounded-2xl overflow-hidden flex items-center justify-center p-4 z-10 relative pointer-events-none">
+                    <span class="text-3xl xl:text-4xl font-black text-green-950 text-center leading-tight w-full flex items-center justify-center">Option 4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- QUIZ BOARD - CÂU HỎI -->
+        <!-- ========================================== -->
+        <div id="question-container" class="absolute z-20 pointer-events-auto flex flex-col p-2 transition-all duration-300 transform origin-center drop-shadow-2xl" style="left: 28%; top: 34.5%; width: 44%; bottom: 12%;">
+            <div class="w-full h-full bg-white rounded-3xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] border-[12px] border-amber-900 border-b-[16px] border-b-amber-950 flex items-center justify-center overflow-hidden relative p-4">
+                <img id="quiz-q-img" src="https://placehold.co/800x400/e2e8f0/475569?text=LOADING+QUESTION..." class="max-w-full max-h-full object-contain drop-shadow-md">
+                <p id="quiz-q-txt" class="text-5xl lg:text-7xl font-black text-gray-800 text-center leading-tight hidden">LOADING QUESTION...</p>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TIMER & Q COUNTER -->
+        <!-- ========================================== -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-slate-800 to-indigo-950 text-indigo-100 font-black px-8 py-2 rounded-full border-2 border-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)] flex items-center gap-6 z-40">
+            <span class="text-xl flex items-center gap-2">⏱️ <span id="quiz-timer" class="tracking-widest">03:00</span></span>
+            <span class="text-indigo-400/50 text-xl">|</span>
+            <span class="text-lg">Q: <span id="quiz-counter" class="text-xl tracking-wider text-yellow-300">1/20</span></span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PLAYER 1 (HERO) -->
+        <!-- ========================================== -->
+        <div class="absolute bottom-4 left-8 z-20 flex flex-col items-center gap-6 pointer-events-none w-64">
+            <div class="flex flex-col gap-3 w-full pointer-events-auto">
+                <div class="flex items-start gap-2 bg-black/40 p-2 rounded-xl border border-gray-600 backdrop-blur-sm self-start">
+                    <div class="flex gap-1">
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">🔥</div>
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">❄️</div>
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">⚡</div>
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">🛡️</div>
+                    </div>
+                    <div class="w-px h-8 bg-gray-500/50 mx-1"></div>
+                    <div class="flex items-start gap-2">
+                        <div class="w-8 h-8 bg-gray-800 rounded-full border border-gray-50 flex items-center justify-center text-sm opacity-40 shadow-inner" id="p1-queue-2"></div>
+                        <button onclick="triggerClickSkill('p1', 'ult')" class="relative flex flex-col items-center group cursor-pointer active:scale-95 transition-all focus:outline-none pointer-events-auto">
+                            <div class="w-12 h-12 bg-blue-900 rounded-full border-2 border-cyan-400 flex items-center justify-center text-2xl shadow-[0_0_15px_cyan] transition-all" id="p1-queue-1">
+                                <span class="opacity-20 text-cyan-200">✨</span>
+                            </div>
+                            <div class="absolute -bottom-3 bg-blue-700 px-2 py-0.5 rounded text-[10px] font-black text-white border border-blue-400 shadow-md" id="ui-key-p1-ult">SPACE</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 w-full">
+                    <div class="w-full h-8 bg-black/60 rounded-full border-2 border-gray-600 p-1 relative overflow-hidden shadow-lg">
+                        <div id="p1-hp-bar" class="h-full w-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all"></div>
+                        <span id="p1-hp-txt" class="absolute inset-0 flex items-center justify-center text-white font-black text-sm text-shadow tracking-widest">100 / 100</span>
+                    </div>
+                    <div class="w-full h-8 bg-black/60 rounded-full border border-gray-600 p-1 relative overflow-hidden shadow-lg">
+                        <div id="p1-mana-bar" class="h-full w-[0%] bg-gradient-to-r from-cyan-400 to-blue-600 shadow-[0_0_15px_cyan] rounded-full transition-all"></div>
+                        <span id="p1-mana-txt" class="absolute inset-0 flex items-center justify-center text-cyan-100 font-bold text-sm text-shadow tracking-widest">Mana: 0/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-4 pointer-events-auto mt-2">
+                <!-- Avatar P1 -->
+                <div class="animate-boss z-10 avatar-container relative w-40 h-40" id="p1-avatar-box">
+                    <div class="shield-bubble" id="p1-shield-bubble"><span id="p1-shield-txt" class="shield-number"></span></div>
+                    <div class="w-full h-full rounded-full border-[5px] border-blue-400 shadow-[0_0_25px_rgba(59,130,246,0.6)] bg-blue-950 flex items-center justify-center overflow-hidden relative shrink-0 z-10 avatar">
+                        <div id="p1-avatar-inner" class="w-full h-full pointer-events-none flex items-center justify-center bg-black">
+                            <img src="https://placehold.co/200x200/1E3A8A/F6C90E?text=HERO" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+                <!-- Vùng Buttons P1 -->
+                <div id="actions-p1" class="flex gap-4 bg-black/50 p-3 rounded-full border border-gray-600 backdrop-blur-md shrink-0 shadow-xl transition-all">
+                    <div class="flex flex-col items-center relative w-14 h-14">
+                        <button id="btn-p1-atk" onclick="triggerClickSkill('p1', 'atk')" class="cd-btn w-full h-full bg-gray-800 border-2 border-orange-500 rounded-full text-orange-400 text-2xl shadow-[0_0_15px_rgba(251,146,60,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
+                            🏹
+                            <div class="cd-ring"></div><div class="cd-overlay"></div><div class="cd-text" id="cd-txt-p1-atk"></div>
+                        </button>
+                        <span class="absolute -bottom-4 text-white text-xs font-black bg-black border border-gray-500 px-2 py-0.5 rounded-full shadow-md pointer-events-none z-30" id="ui-key-p1-s2">W</span>
+                    </div>
+                    <div class="flex flex-col items-center relative w-14 h-14">
+                        <button id="btn-p1-def" onclick="triggerClickSkill('p1', 'def')" class="cd-btn w-full h-full bg-gray-800 border-2 border-blue-500 rounded-full text-blue-400 text-2xl shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
+                            🛡️
+                            <div class="cd-ring"></div><div class="cd-overlay"></div><div class="cd-text" id="cd-txt-p1-def"></div>
+                        </button>
+                        <span class="absolute -bottom-4 text-white text-xs font-black bg-black border border-gray-500 px-2 py-0.5 rounded-full shadow-md pointer-events-none z-30" id="ui-key-p1-s1">Q</span>
+                    </div>
+                    <div class="flex flex-col items-center relative w-14 h-14">
+                        <button id="btn-p1-heal" onclick="triggerClickSkill('p1', 'heal')" class="cd-btn w-full h-full bg-gray-800 border-2 border-green-500 rounded-full text-green-400 text-2xl shadow-[0_0_15px_rgba(34,197,94,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
+                            ✚
+                            <div class="cd-ring"></div><div class="cd-overlay"></div><div class="cd-text" id="cd-txt-p1-heal"></div>
+                        </button>
+                        <span class="absolute -bottom-4 text-white text-xs font-black bg-black border border-gray-500 px-2 py-0.5 rounded-full shadow-md pointer-events-none z-30" id="ui-key-p1-s3">E</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PLAYER 2 (BOSS) -->
+        <!-- ========================================== -->
+        <div class="absolute bottom-4 right-8 z-20 flex flex-col items-center gap-6 pointer-events-none w-64">
+            
+            <div class="flex flex-col items-end gap-3 w-full pointer-events-auto">
+                <div class="flex items-start flex-row-reverse gap-2 bg-black/40 p-2 rounded-xl border border-gray-600 backdrop-blur-sm self-end">
+                    <div class="flex gap-1 flex-row-reverse">
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">🍔</div>
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">🌀</div>
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">⚡</div>
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-sm opacity-50 grayscale shadow-inner">💤</div>
+                    </div>
+                    <div class="w-px h-8 bg-gray-500/50 mx-1"></div>
+                    <div class="flex items-start flex-row-reverse gap-2">
+                        <div class="w-8 h-8 bg-gray-800 rounded-full border border-gray-500 flex items-center justify-center text-sm opacity-40 shadow-inner" id="p2-queue-2"></div>
+                        <!-- Nút CLICK Chiêu Cuối P2 -->
+                        <button onclick="triggerClickSkill('p2', 'ult')" class="relative flex flex-col items-center group cursor-pointer active:scale-95 transition-all focus:outline-none pointer-events-auto">
+                            <div class="w-12 h-12 bg-red-900 rounded-full border-2 border-orange-400 flex items-center justify-center text-2xl shadow-[0_0_15px_orange] transition-all" id="p2-queue-1">
+                                <span class="opacity-20 text-orange-200">✨</span>
+                            </div>
+                            <div class="absolute -bottom-3 bg-red-700 px-2 py-0.5 rounded text-[10px] font-black text-white border border-red-400 shadow-md" id="ui-key-p2-ult">ENTER</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 w-full">
+                    <div class="w-full h-8 bg-black/60 rounded-full border-2 border-gray-600 p-1 relative overflow-hidden shadow-lg">
+                        <div id="p2-hp-bar" class="h-full w-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full transition-all origin-right"></div>
+                        <span id="p2-hp-txt" class="absolute inset-0 flex items-center justify-center text-white font-black text-sm text-shadow tracking-widest">1000 / 1000</span>
+                    </div>
+                    <div class="w-full h-8 bg-black/60 rounded-full border border-gray-600 p-1 relative overflow-hidden shadow-lg">
+                        <div id="p2-mana-bar" class="h-full w-[0%] bg-gradient-to-l from-fuchsia-600 to-rose-500 shadow-[0_0_15px_fuchsia] rounded-full transition-all origin-right float-right"></div>
+                        <span id="p2-mana-txt" class="absolute inset-0 flex items-center justify-center text-fuchsia-100 font-bold text-sm text-shadow tracking-widest">Mana: 0/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-4 pointer-events-auto mt-2">
+                <!-- Avatar P2 -->
+                <div class="animate-boss z-10 avatar-container relative w-40 h-40" id="p2-avatar-box">
+                    <div class="shield-bubble" id="p2-shield-bubble"><span id="p2-shield-txt" class="shield-number"></span></div>
+                    <div class="w-full h-full rounded-full border-[5px] border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.6)] bg-black flex items-center justify-center overflow-hidden relative shrink-0 z-10 avatar">
+                        <div id="p2-avatar-inner" class="w-full h-full pointer-events-none flex items-center justify-center bg-black">
+                        </div>
+                    </div>
+                </div>
+                <!-- Vùng Buttons P2 -->
+                <div id="actions-p2" class="flex gap-4 bg-black/50 p-3 rounded-full border border-gray-600 backdrop-blur-md shrink-0 shadow-xl transition-all">
+                    <div class="flex flex-col items-center relative w-14 h-14">
+                        <button id="btn-p2-atk" onclick="triggerClickSkill('p2', 'atk')" class="cd-btn w-full h-full bg-gray-800 border-2 border-orange-500 rounded-full text-orange-400 text-2xl shadow-[0_0_15px_rgba(251,146,60,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
+                            🩴
+                            <div class="cd-ring"></div><div class="cd-overlay"></div><div class="cd-text" id="cd-txt-p2-atk"></div>
+                        </button>
+                        <span class="absolute -bottom-4 text-white text-xs font-black bg-black border border-gray-500 px-2 py-0.5 rounded-full shadow-md pointer-events-none z-30" id="ui-key-p2-s2">I</span>
+                    </div>
+                    <div class="flex flex-col items-center relative w-14 h-14">
+                        <button id="btn-p2-def" onclick="triggerClickSkill('p2', 'def')" class="cd-btn w-full h-full bg-gray-800 border-2 border-blue-500 rounded-full text-blue-400 text-2xl shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
+                            🛡️
+                            <div class="cd-ring"></div><div class="cd-overlay"></div><div class="cd-text" id="cd-txt-p2-def"></div>
+                        </button>
+                        <span class="absolute -bottom-4 text-white text-xs font-black bg-black border border-gray-500 px-2 py-0.5 rounded-full shadow-md pointer-events-none z-30" id="ui-key-p2-s1">U</span>
+                    </div>
+                    <div class="flex flex-col items-center relative w-14 h-14">
+                        <button id="btn-p2-heal" onclick="triggerClickSkill('p2', 'heal')" class="cd-btn w-full h-full bg-gray-800 border-2 border-green-500 rounded-full text-green-400 text-2xl shadow-[0_0_15px_rgba(34,197,94,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
+                            ✚
+                            <div class="cd-ring"></div><div class="cd-overlay"></div><div class="cd-text" id="cd-txt-p2-heal"></div>
+                        </button>
+                        <span class="absolute -bottom-4 text-white text-xs font-black bg-black border border-gray-500 px-2 py-0.5 rounded-full shadow-md pointer-events-none z-30" id="ui-key-p2-s3">O</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH "START BATTLE" (VS SCREEN) -->
+        <!-- ========================================== -->
+        <div id="vs-modal" class="hidden fixed inset-0 z-[1500] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6">
+             <h1 class="text-6xl font-black text-white mb-12 tracking-widest animate-pulse">GET READY!</h1>
+             <div class="flex items-center gap-12 w-full max-w-5xl justify-center">
+                 <div class="flex flex-col items-center gap-6 animate-boss">
+                     <div class="w-64 h-64 rounded-full border-[8px] border-cyan-400 shadow-[0_0_50px_cyan] overflow-hidden bg-black" id="vs-p1-avatar"></div>
+                     <input type="text" id="p1-name-input" value="HERO" class="bg-black/50 border-4 border-cyan-500 rounded-full text-cyan-300 font-black text-3xl px-6 py-2 text-center outline-none uppercase w-64 placeholder-cyan-800 transition-all focus:bg-cyan-900 focus:text-white" placeholder="NAME P1">
+                 </div>
+                 <div class="text-9xl font-black text-yellow-500 italic drop-shadow-[0_0_20px_orange]">VS</div>
+                 <div class="flex flex-col items-center gap-6 animate-boss" style="animation-delay: 0.5s;">
+                     <div class="w-64 h-64 rounded-full border-[8px] border-orange-500 shadow-[0_0_50px_orange] overflow-hidden bg-black" id="vs-p2-avatar"></div>
+                     <input type="text" id="p2-name-input" value="BOSS" class="bg-black/50 border-4 border-orange-500 rounded-full text-orange-400 font-black text-3xl px-6 py-2 text-center outline-none uppercase w-64 placeholder-orange-800 transition-all focus:bg-orange-900 focus:text-white" placeholder="NAME P2">
+                 </div>
+             </div>
+             <button id="btn-start-battle" class="mt-16 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-black text-4xl px-16 py-6 rounded-full shadow-[0_0_30px_rgba(239,68,68,0.6)] hover:scale-110 transition-all border-4 border-yellow-300 focus:outline-none">FIGHT!</button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MÀN HÌNH KẾT THÚC & LEADERBOARD (Ẩn mặc định) -->
+        <!-- ========================================== -->
+        <div id="endgame-modal" class="hidden fixed inset-0 z-[2000] bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+            <div id="confetti-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+            
+            <div class="bg-slate-900 border-4 border-yellow-500 rounded-3xl shadow-[0_0_50px_rgba(234,179,8,0.3)] w-full max-w-4xl flex flex-col overflow-hidden relative z-10 animate-bounce" style="animation-iteration-count: 1; animation-duration: 0.5s;">
+                <div class="bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 p-6 text-center">
+                    <h1 id="winner-title" class="text-4xl md:text-6xl font-black text-slate-900 tracking-widest text-shadow uppercase">PLAYER 1 WINS!</h1>
+                </div>
+                
+                <div class="p-8 flex flex-col items-center gap-6 relative">
+                    <div class="w-48 h-48 rounded-full border-[8px] border-yellow-400 shadow-[0_0_30px_yellow] overflow-hidden bg-black z-20" id="winner-avatar">
+                    </div>
+
+                    <div class="w-full mt-4 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+                        <div class="bg-slate-950 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-yellow-500">🏆 HALL OF FAME</h3>
+                            <button id="btn-clear-history" class="text-sm bg-red-900/50 hover:bg-red-600 text-red-200 hover:text-white px-3 py-1 rounded transition focus:outline-none">Clear History</button>
+                        </div>
+                        <div class="max-h-60 overflow-y-auto">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead class="bg-slate-800/50 text-slate-400 sticky top-0">
+                                    <tr>
+                                        <th class="px-4 py-2 font-bold">Time</th>
+                                        <th class="px-4 py-2 font-bold text-blue-400">P1 (HERO)</th>
+                                        <th class="px-4 py-2 font-bold text-center">VS</th>
+                                        <th class="px-4 py-2 font-bold text-red-400 text-right">P2 (BOSS)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-tbody" class="divide-y divide-slate-700/50">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950 p-4 text-center">
+                    <button id="btn-play-again" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xl px-12 py-3 rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] hover:scale-105 transition-all focus:outline-none">PLAY AGAIN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SETTINGS NÚT TRÊN CÙNG TRÁI -->
+        <!-- ========================================== -->
+        <button id="open-settings-btn" class="absolute top-[2%] left-[1.5%] p-3 bg-edVang hover:bg-edVangHover text-edNavy rounded-full shadow-ed transition transform hover:scale-110 z-[80] focus:outline-none" title="Cài Đặt Game">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </button>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SETTINGS MODAL -->
+    <!-- ========================================== -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center opacity-0 pointer-events-none">
+        <div class="bg-edKem w-11/12 max-w-[1400px] h-[95vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border-4 border-edNavy transform transition-transform scale-95 duration-200" id="modal-content">
+            
+            <div class="bg-edNavy text-white px-6 py-4 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">⚙️</span>
+                    <h2 class="text-2xl font-bold uppercase tracking-wider text-edVang">Hệ Thống Cài Đặt</h2>
+                    
+                    <button id="toggle-grid-btn" class="ml-4 p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition text-sm flex items-center gap-2 focus:outline-none" title="Bật/Tắt Lưới Tọa Độ (A-P, 1-9)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                        <span class="font-bold hidden md:inline">Bật Lưới Tọa Độ</span>
+                    </button>
+                </div>
+                <button id="close-settings-btn" class="text-gray-300 hover:text-white transition focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="flex px-6 pt-4 gap-2 bg-white border-b border-gray-200 shrink-0">
+                <button class="tab-btn active px-6 py-3 rounded-t-lg font-bold text-lg focus:outline-none" data-target="tab-data">1. DATA (Dữ Liệu)</button>
+                <button class="tab-btn px-6 py-3 rounded-t-lg font-bold text-lg focus:outline-none" data-target="tab-hero-boss">2. HERO & BOSS</button>
+                <button class="tab-btn px-6 py-3 rounded-t-lg font-bold text-lg text-teal-700 focus:outline-none" data-target="tab-skills">3. SKILLS</button>
+                <button class="tab-btn px-6 py-3 rounded-t-lg font-black text-lg text-orange-600 border-b-4 border-orange-500 focus:outline-none" data-target="tab-controls">4. CONTROLS (Phím)</button>
+                <div class="flex-grow"></div>
+                <button id="save-and-close-btn" class="px-8 py-2 mb-2 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.5)] flex items-center gap-2 transition transform hover:scale-105 border-2 border-blue-400 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    <span>LƯU & ĐÓNG</span>
+                </button>
+            </div>
+
+            <div class="flex-grow overflow-hidden relative p-6 bg-edKem">
+                
+                <!-- TAB 1: DATA -->
+                <div id="tab-data" class="tab-content active h-full flex flex-col">
+                    <div class="flex flex-wrap gap-4 mb-4 items-end bg-white p-4 rounded-xl shadow-sm border border-gray-200 shrink-0">
+                        
+                        <div class="flex flex-col gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-inner">
+                            <span class="text-xs font-bold text-blue-800 uppercase tracking-wider">Định dạng hiển thị (Swap Column)</span>
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm text-gray-700">Cột A:</span>
+                                    <select id="col-a-type" data-save="col_a_type" class="p-1.5 border border-gray-300 rounded outline-none text-sm font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                        <option value="image">🖼️ Hình Ảnh (Local)</option>
+                                        <option value="text">📝 Văn Bản (Text)</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm text-gray-700">Cột B:</span>
+                                    <select id="col-b-type" data-save="col_b_type" class="p-1.5 border border-gray-300 rounded outline-none text-sm font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                        <option value="text" selected>📝 Văn Bản (Text)</option>
+                                        <option value="image">🖼️ Hình Ảnh (Local)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg shadow-inner">
+                            <span class="text-xs font-bold text-orange-800 uppercase tracking-wider">Tự động điền & Bật hàng loạt (Auto Fill & Tick)</span>
+                            <div class="flex items-center gap-2">
+                                <select id="autofill-target" class="p-1 border border-gray-300 rounded text-sm bg-white outline-none font-semibold">
+                                    <option value="colA">Điền số Cột A</option>
+                                    <option value="colB">Điền số Cột B</option>
+                                    <option value="colC">Đánh dấu Tick Cột C (Active)</option>
+                                </select>
+                                <input type="number" id="autofill-start" placeholder="Từ dòng" class="w-20 p-1 border border-gray-300 rounded text-center text-sm outline-none focus:border-orange-500">
+                                <span>-</span>
+                                <input type="number" id="autofill-end" placeholder="Đến dòng" class="w-20 p-1 border border-gray-300 rounded text-center text-sm outline-none focus:border-orange-500">
+                                <button id="btn-auto-fill" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm font-bold shadow transition focus:outline-none">Áp dụng</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-2 p-3 bg-gray-50 border border-gray-300 rounded-lg shadow-inner">
+                            <span class="text-xs font-bold text-gray-800 uppercase tracking-wider">Chế độ xuất hiện câu hỏi</span>
+                            <select id="setting_quiz_mode" data-save="setting_quiz_mode" class="p-1.5 border border-gray-300 rounded outline-none text-sm font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                <option value="sequential">Chế độ 1: Lần lượt theo thứ tự</option>
+                                <option value="random">Chế độ 2: Xáo trộn ngẫu nhiên</option>
+                            </select>
+                        </div>
+
+                        <div class="flex-grow"></div>
+                        <button id="btn-clear-data" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition flex items-center gap-1 focus:outline-none">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+
+                    <div class="table-container bg-white rounded-xl shadow-sm border border-gray-300 flex-grow relative">
+                        <table class="excel-table" id="data-grid">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th style="width: 45%;" class="text-left relative">CỘT A (Dữ Liệu 1) <span class="absolute right-2 top-2 text-xs font-normal opacity-80" id="col-a-lbl"></span></th>
+                                    <th style="width: 45%;" class="text-left relative">CỘT B (Dữ Liệu 2) <span class="absolute right-2 top-2 text-xs font-normal opacity-80" id="col-b-lbl"></span></th>
+                                    <th style="width: 10%;">ACTIVE (C)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grid-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 2: HERO & BOSS -->
+                <div id="tab-hero-boss" class="tab-content h-full overflow-y-auto pb-10">
+                    <div class="grid grid-cols-2 gap-6 p-4">
+                        <div class="bg-blue-50 p-4 rounded-xl border-2 border-blue-300 shadow-sm">
+                            <h3 class="font-bold text-blue-900 mb-2">🔵 PLAYER 1 (HERO) AVATAR</h3>
+                            <input type="text" id="p1-avatar-input" data-save="p1_avatar" class="w-full p-3 border border-blue-300 rounded-lg outline-none focus:border-blue-500" placeholder="Nhập số (1-20) HOẶC Link Tenor/Ảnh">
+                            <p class="text-xs text-gray-500 mt-2">Hỗ trợ tự động: Nhập số tự hiểu là ảnh Local (Hero/1.png). Nhập Link tự tải từ mạng.</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-xl border-2 border-red-300 shadow-sm">
+                            <h3 class="font-bold text-red-900 mb-2">🔴 PLAYER 2 (BOSS) AVATAR</h3>
+                            <input type="text" id="p2-avatar-input" data-save="p2_avatar" class="w-full p-3 border border-red-300 rounded-lg outline-none focus:border-red-500" placeholder="Nhập số (1-20) HOẶC Link Tenor/Ảnh">
+                            <p class="text-xs text-gray-500 mt-2">Hỗ trợ tự động: Nhập số tự hiểu là ảnh Local (Hero/1.png). Nhập Link tự tải từ mạng.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-ed border-t-4 border-edNavy overflow-hidden mb-6 mx-4">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-800 text-xl border-b-2 border-gray-300">
+                                    <th class="py-4 px-6 font-extrabold w-[25%] tracking-wide">📊 CHỈ SỐ</th>
+                                    <th class="py-4 px-6 font-extrabold w-[37.5%] text-blue-700 border-l border-gray-300 bg-blue-50/50">🔵 PLAYER 1 (HERO)</th>
+                                    <th class="py-4 px-6 font-extrabold w-[37.5%] text-red-700 border-l border-gray-300 bg-red-50/50">🔴 PLAYER 2 (BOSS)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-base text-gray-800 divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">🌌 Hình Nền (Background)</td>
+                                    <td colspan="2" class="py-4 px-6 border-l border-gray-200 bg-purple-50/20">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <input type="text" id="game-bg-id" data-save="game_bg_id" value="" class="flex-1 p-2 border border-purple-300 rounded font-bold text-center focus:ring-2 focus:ring-purple-500 outline-none bg-white" placeholder="Nhập Link Ảnh (.jpg, .png, .gif) hoặc Tenor Link/ID để đổi nền">
+                                            <div class="flex items-center gap-1 bg-white p-2 rounded border border-purple-300 shadow-sm shrink-0">
+                                                <span class="text-xs font-bold text-purple-900">Độ mờ:</span>
+                                                <input type="number" id="game-bg-opacity" data-save="game_bg_opacity" value="40" min="0" max="100" class="w-12 text-center font-bold text-purple-700 outline-none border-b border-purple-200 focus:border-purple-500">
+                                                <span class="text-xs font-bold text-purple-700">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">❤️ Max HP</td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20">
+                                        <input type="number" id="hero-max-hp" data-save="hero_max_hp" value="100" class="w-24 p-2 border border-blue-300 rounded font-black text-blue-700 text-center focus:ring-2 focus:ring-blue-500 outline-none text-lg">
+                                    </td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20">
+                                        <input type="number" id="boss-max-hp" data-save="boss_max_hp" value="1000" class="w-24 p-2 border border-red-300 rounded font-black text-red-700 text-center focus:ring-2 focus:ring-red-500 outline-none text-lg">
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-gray-700">⚔️ Thông số kỹ năng cơ bản (Basic Actions)</td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-blue-50/20">
+                                        <div class="bg-white p-3 rounded border border-blue-200 shadow-sm flex flex-col gap-2">
+                                            <div class="text-xs font-bold text-blue-800 uppercase border-b border-blue-100 pb-1">Hệ Số Quy Đổi (1 Mana =)</div>
+                                            <div class="flex flex-col gap-1.5">
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">ATK 🏹</span><input type="number" id="hero-mana-atk" data-save="hero_mana_atk" value="50" class="w-16 p-1 text-center border rounded font-bold text-orange-600 outline-none"></div>
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">DEF 🛡️</span><input type="number" id="hero-mana-def" data-save="hero_mana_def" value="10" class="w-12 p-1 text-center border rounded font-bold text-blue-600 outline-none"></div>
+                                                <div class="flex items-center justify-between mt-1"><span class="text-xs font-bold text-gray-600">Max Shield:</span><input type="number" id="hero-max-shield" data-save="hero_max_shield" value="100" class="w-12 p-1 text-center border rounded font-bold text-purple-600 outline-none"></div>
+                                                <div class="flex items-center justify-between border-t border-blue-100 pt-1.5 mt-0.5"><span class="text-sm font-bold w-16">HEAL ✚</span><input type="number" id="hero-mana-heal" data-save="hero_mana_heal" value="15" class="w-16 p-1 text-center border rounded font-bold text-green-600 outline-none"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6 border-l border-gray-200 bg-red-50/20">
+                                        <div class="bg-white p-3 rounded border border-red-200 shadow-sm flex flex-col gap-2">
+                                            <div class="text-xs font-bold text-red-800 uppercase border-b border-red-100 pb-1">Hệ Số Quy Đổi (1 Mana =)</div>
+                                            <div class="flex flex-col gap-1.5">
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">ATK 🏹</span><input type="number" id="boss-mana-atk" data-save="boss_mana_atk" value="50" class="w-16 p-1 text-center border rounded font-bold text-orange-600 outline-none"></div>
+                                                <div class="flex items-center justify-between"><span class="text-sm font-bold w-16">DEF 🛡️</span><input type="number" id="boss-mana-def" data-save="boss_mana_def" value="10" class="w-12 p-1 text-center border rounded font-bold text-blue-600 outline-none"></div>
+                                                <div class="flex items-center justify-between mt-1"><span class="text-xs font-bold text-gray-600">Max Shield:</span><input type="number" id="boss-max-shield" data-save="boss_max_shield" value="100" class="w-12 p-1 text-center border rounded font-bold text-purple-600 outline-none"></div>
+                                                <div class="flex items-center justify-between border-t border-red-100 pt-1.5 mt-0.5"><span class="text-sm font-bold w-16">HEAL ✚</span><input type="number" id="boss-mana-heal" data-save="boss_mana_heal" value="15" class="w-16 p-1 text-center border rounded font-bold text-green-600 outline-none"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6 font-bold text-red-700">🔥 Cơ chế Hủy Diệt (Sudden Death)</td>
+                                    <td colspan="2" class="py-4 px-6 border-l border-gray-200 bg-orange-50/20">
+                                        <div class="flex items-center gap-4">
+                                            <div class="flex items-center gap-2 bg-white p-2 rounded border border-orange-300 shadow-sm">
+                                                <span class="text-xs font-bold text-orange-900">Thời gian đếm ngược:</span>
+                                                <input type="number" id="sudden-death-time" data-save="sudden_death_time" value="3" min="1" class="w-12 text-center font-bold text-orange-700 outline-none border-b border-orange-200 focus:border-orange-500">
+                                                <span class="text-xs font-bold text-orange-700">phút</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 bg-white p-2 rounded border border-red-300 shadow-sm">
+                                                <span class="text-xs font-bold text-red-900">Sát thương Rút máu:</span>
+                                                <input type="number" id="sudden-death-dmg" data-save="sudden_death_dmg" value="5" min="1" class="w-16 text-center font-bold text-red-700 outline-none border-b border-red-200 focus:border-red-500">
+                                                <span class="text-xs font-bold text-red-700">HP / giây</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-2">Sau thời gian này, cả 2 bên sẽ tự động bị rút máu mỗi giây để ép kết thúc trận đấu.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex gap-4 p-4 mx-4 mb-6 bg-orange-50 rounded-xl border border-orange-200 shadow-sm">
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-gray-500 block">Thời gian Stun khi sai (Giây):</label>
+                            <input type="number" id="setting_stun_time" data-save="setting_stun_time" value="2" class="w-full h-8 border rounded px-2 text-center font-bold text-orange-700 outline-none focus:border-orange-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-gray-500 block">Cooldown Giáp (s):</label>
+                            <input type="number" id="setting_cd_def" data-save="setting_cd_def" value="5" class="w-full h-8 border rounded px-2 text-center font-bold outline-none focus:border-blue-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-gray-500 block">Cooldown Tấn công (s):</label>
+                            <input type="number" id="setting_cd_atk" data-save="setting_cd_atk" value="3" class="w-full h-8 border rounded px-2 text-center font-bold outline-none focus:border-blue-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs font-bold text-gray-500 block">Cooldown Hồi máu (s):</label>
+                            <input type="number" id="setting_cd_heal" data-save="setting_cd_heal" value="8" class="w-full h-8 border rounded px-2 text-center font-bold outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TAB 3: SKILLS -->
+                <div id="tab-skills" class="tab-content h-full overflow-y-auto pb-10">
+                    <div class="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500 p-4 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-black text-blue-900 mb-1">🎭 KHO KỸ NĂNG TUYỆT CHIÊU (ULTIMATE POOL)</h3>
+                        <p class="text-sm text-gray-700 font-medium">Bạn hãy quy định xem **Ai** có quyền nhận được Skill nào khi bốc ngẫu nhiên (Tốn 5 Mana / lần dùng).</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow border border-gray-300 overflow-hidden">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead>
+                                <tr class="bg-gray-800 text-white text-sm uppercase tracking-wider">
+                                    <th class="py-3 px-4 w-[25%] border-r border-gray-700">Kỹ Năng</th>
+                                    <th class="py-3 px-4 w-[40%] border-r border-gray-700">Mô Tả Hiệu Ứng</th>
+                                    <th class="py-3 px-4 w-[15%] border-r border-gray-700 text-center">Thông Số</th>
+                                    <th class="py-3 px-4 w-[20%] text-center text-yellow-300 font-black">PHÂN QUYỀN</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-purple-900 border-r border-gray-200">👁️ Copycat (Đạo Chích)</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Sao chép tuyệt chiêu đối thủ vừa dùng và bắn ngược lại.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="5" class="w-16 p-1 border rounded text-center" data-save="skill_1_time"> Giây</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_1_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-gray-700 border-r border-gray-200">🥷 Shuriken Barrage</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Ném liên hoàn X phi tiêu nhanh. Sát thương = Base DMG * X.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="3" class="w-16 p-1 border rounded text-center" data-save="skill_2_multi"> Số lượng</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_2_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-orange-700 border-r border-gray-200">☄️ Meteor Shower</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Gọi 15 sao băng rơi lả tả xuống màn hình đối thủ.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="5" class="w-16 p-1 border rounded text-center" data-save="skill_3_dmg"> DMG/hit</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_3_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-yellow-600 border-r border-gray-200">⚡ Thunder Strike</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Sét đánh chớp giật, tê liệt (Stun) 4 phím Quiz đối phương.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center text-xs">
+                                        DMG: <input type="number" value="20" class="w-12 p-1 border rounded text-center mb-1" data-save="skill_4_dmg"><br>
+                                        Giây: <input type="number" value="3" class="w-12 p-1 border rounded text-center" data-save="skill_4_time">
+                                    </td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_4_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-green-700 border-r border-gray-200">🍔 Junk Food Blind</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Dán đồ ăn vặt che kín 4 ô đáp án của đối thủ.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="5" class="w-16 p-1 border rounded text-center" data-save="skill_5_time"> Giây</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_5_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-cyan-700 border-r border-gray-200">❄️ Absolute Freeze</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Kỷ băng hà, đóng băng cứng mọi phím và avatar đối phương.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="4" class="w-16 p-1 border rounded text-center" data-save="skill_6_time"> Giây</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_6_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-pink-600 border-r border-gray-200">🛡️ Mirror Shield</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Phản đòn. Dội lại 50% sát thương/hiệu ứng của skill kế tiếp.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="5" class="w-16 p-1 border rounded text-center" data-save="skill_7_time"> Giây</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_7_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-emerald-700 border-r border-gray-200">💤 Rest & Heal</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Ngủ tạo Giáp. Nếu hết giờ Giáp ko vỡ -> Cộng vào Máu.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center text-xs">
+                                        Shield: <input type="number" value="100" class="w-12 p-1 border rounded text-center mb-1" data-save="skill_8_shield"><br>
+                                        Giây: <input type="number" value="5" class="w-12 p-1 border rounded text-center" data-save="skill_8_time">
+                                    </td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_8_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-red-700 border-r border-gray-200">🔥 Mega Fireball</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Bắn cầu lửa khổng lồ, trừ lượng HP cực mạnh.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="100" class="w-16 p-1 border rounded text-center" data-save="skill_9_dmg"> DMG</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_9_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-2 px-4 font-bold text-blue-500 border-r border-gray-200">☄️ Kamehameha</td>
+                                    <td class="py-2 px-4 text-sm text-gray-600 border-r border-gray-200">Phóng luồng năng lượng khổng lồ xuyên thấu đối phương.</td>
+                                    <td class="py-2 px-4 border-r border-gray-200 text-center"><input type="number" value="120" class="w-16 p-1 border rounded text-center" data-save="skill_10_dmg"> DMG</td>
+                                    <td class="py-2 px-4 text-center">
+                                        <select data-save="skill_10_owner" class="w-full p-2 border border-gray-300 rounded font-bold text-sm outline-none cursor-pointer focus:ring-2 focus:ring-blue-500">
+                                            <option value="p1">🔵 Player 1</option><option value="p2">🔴 Player 2</option><option value="both" selected>⚪ Cả Hai</option><option value="none">❌ Khóa</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 4: CONTROLS (8 KEYS/PLAYER) -->
+                <div id="tab-controls" class="tab-content h-full overflow-y-auto">
+                    <div class="mb-4 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-black text-orange-900 mb-1">🎮 CẤU HÌNH BÀN PHÍM (8 Nút/Người)</h3>
+                        <p class="text-sm text-gray-700 font-medium">Nhấp chuột vào ô bất kỳ và <strong>nhấn 1 phím trên bàn phím</strong> để thay đổi. Tuyệt đối không đặt trùng phím.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8 pb-8">
+                        <!-- P1 Keys -->
+                        <div class="bg-blue-50 border-2 border-blue-300 rounded-2xl p-6 shadow-sm relative flex flex-col">
+                            <div class="absolute -top-4 left-6 bg-blue-600 text-white px-4 py-1 rounded-full font-black tracking-widest text-sm shadow-md">🔵 PLAYER 1 (HERO)</div>
+                            
+                            <h4 class="font-bold text-blue-900 mb-3 border-b border-blue-200 pb-1 mt-2">Phím Trả Lời Quiz (4 Đáp án)</h4>
+                            <div class="grid grid-cols-4 gap-2 mb-6">
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">A</span><input type="text" readonly data-save="key_p1_a1" value="A" class="keybind-input w-full h-14 bg-white border-2 border-blue-300 rounded-lg text-blue-700 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">B</span><input type="text" readonly data-save="key_p1_a2" value="S" class="keybind-input w-full h-14 bg-white border-2 border-blue-300 rounded-lg text-blue-700 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">C</span><input type="text" readonly data-save="key_p1_a3" value="D" class="keybind-input w-full h-14 bg-white border-2 border-blue-300 rounded-lg text-blue-700 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">D</span><input type="text" readonly data-save="key_p1_a4" value="F" class="keybind-input w-full h-14 bg-white border-2 border-blue-300 rounded-lg text-blue-700 shadow-inner"></div>
+                            </div>
+
+                            <h4 class="font-bold text-blue-900 mb-3 border-b border-blue-200 pb-1">Phím Hành Động Cơ Bản</h4>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🛡️ Giáp</span><input type="text" readonly data-save="key_p1_s1" value="Q" class="keybind-input w-full h-14 bg-blue-100 border-2 border-blue-400 rounded-lg text-blue-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🏹 Tấn Công</span><input type="text" readonly data-save="key_p1_s2" value="W" class="keybind-input w-full h-14 bg-blue-100 border-2 border-blue-400 rounded-lg text-blue-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">✚ Hồi Máu</span><input type="text" readonly data-save="key_p1_s3" value="E" class="keybind-input w-full h-14 bg-blue-100 border-2 border-blue-400 rounded-lg text-blue-800 shadow-inner"></div>
+                            </div>
+
+                            <h4 class="font-bold text-blue-900 mb-3 border-b border-blue-200 pb-1 mt-auto">Phím Tung Chiêu (Ultimate)</h4>
+                            <div class="flex justify-center">
+                                <div class="flex flex-col items-center gap-2 w-1/2">
+                                    <span class="text-xs font-bold text-gray-500 text-center">Bấm để dùng Skill đang chờ</span>
+                                    <input type="text" readonly data-save="key_p1_ult" value="SPACE" class="keybind-input w-full h-16 bg-blue-600 border-b-4 border-blue-800 rounded-xl text-white shadow-lg text-2xl">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- P2 Keys -->
+                        <div class="bg-red-50 border-2 border-red-300 rounded-2xl p-6 shadow-sm relative flex flex-col">
+                            <div class="absolute -top-4 left-6 bg-red-600 text-white px-4 py-1 rounded-full font-black tracking-widest text-sm shadow-md">🔴 PLAYER 2 (BOSS)</div>
+                            
+                            <h4 class="font-bold text-red-900 mb-3 border-b border-red-200 pb-1 mt-2">Phím Trả Lời Quiz (4 Đáp án)</h4>
+                            <div class="grid grid-cols-4 gap-2 mb-6">
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">A</span><input type="text" readonly data-save="key_p2_a1" value="H" class="keybind-input w-full h-14 bg-white border-2 border-red-300 rounded-lg text-red-700 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">B</span><input type="text" readonly data-save="key_p2_a2" value="J" class="keybind-input w-full h-14 bg-white border-2 border-red-300 rounded-lg text-red-700 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">C</span><input type="text" readonly data-save="key_p2_a3" value="K" class="keybind-input w-full h-14 bg-white border-2 border-red-300 rounded-lg text-red-700 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">D</span><input type="text" readonly data-save="key_p2_a4" value="L" class="keybind-input w-full h-14 bg-white border-2 border-red-300 rounded-lg text-red-700 shadow-inner"></div>
+                            </div>
+
+                            <h4 class="font-bold text-red-900 mb-3 border-b border-red-200 pb-1">Phím Hành Động Cơ Bản</h4>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🛡️ Giáp</span><input type="text" readonly data-save="key_p2_s1" value="U" class="keybind-input w-full h-14 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🏹 Tấn Công</span><input type="text" readonly data-save="key_p2_s2" value="I" class="keybind-input w-full h-14 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">✚ Hồi Máu</span><input type="text" readonly data-save="key_p2_s3" value="O" class="keybind-input w-full h-14 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 shadow-inner"></div>
+                            </div>
+
+                            <h4 class="font-bold text-red-900 mb-3 border-b border-red-200 pb-1 mt-auto">Phím Tung Chiêu (Ultimate)</h4>
+                            <div class="flex justify-center">
+                                <div class="flex flex-col items-center gap-2 w-1/2">
+                                    <span class="text-xs font-bold text-gray-500 text-center">Bấm để dùng Skill đang chờ</span>
+                                    <input type="text" readonly data-save="key_p2_ult" value="ENTER" class="keybind-input w-full h-16 bg-red-600 border-b-4 border-red-800 rounded-xl text-white shadow-lg text-2xl">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- HÀM XỬ LÝ CLICK CHUỘT CHO TOÀN BỘ GAME -->
+    <script>
+        window.triggerClickAnswer = function(playerPrefix, index) {
+            if (window.GameplayManager) {
+                window.GameplayManager.handlePlayerAnswer(playerPrefix, index);
+            }
+        };
+
+        window.triggerClickSkill = function(playerPrefix, skillType) {
+            if (window.GameplayManager) {
+                if(skillType === 'ult') {
+                    window.GameplayManager.handleSkill(playerPrefix);
+                } else {
+                    window.useBasicSkill(playerPrefix, skillType);
+                }
+            }
+        };
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ========================================================
+            // BIẾN TOÀN CỤC
+            // ========================================================
+            let isP1Frozen = false;
+            let isP2Frozen = false;
+
+            // ========================================================
+            // ⚓ [NEO -1]: HỆ THỐNG LƯU TRỮ (LOCAL STORAGE)
+            // ========================================================
+            function loadSettings() {
+                try {
+                    const savedSettings = localStorage.getItem('pvp_game_settings');
+                    if (savedSettings) {
+                        const parsedSettings = JSON.parse(savedSettings);
+                        document.querySelectorAll('[data-save]').forEach(el => {
+                            if (parsedSettings[el.dataset.save] !== undefined) {
+                                if (el.type === 'checkbox') el.checked = parsedSettings[el.dataset.save];
+                                else el.value = parsedSettings[el.dataset.save];
+                                el.dispatchEvent(new Event('change')); 
+                            }
+                        });
+                    }
+
+                    const savedDataGrid = localStorage.getItem('pvp_game_data');
+                    if (savedDataGrid) {
+                        const parsedData = JSON.parse(savedDataGrid);
+                        if (parsedData && parsedData.length > 0) {
+                            const tbody = document.getElementById('grid-body');
+                            tbody.innerHTML = ''; 
+                            currentRowCount = 0;
+                            
+                            parsedData.forEach((row, index) => {
+                                createGridRow(index + 1);
+                                document.querySelector(`.excel-input[data-col="colA"][data-row="${index + 1}"]`).value = row.cotA || '';
+                                document.querySelector(`.excel-input[data-col="colB"][data-row="${index + 1}"]`).value = row.cotB || '';
+                                document.querySelector(`.custom-checkbox[data-col="active"][data-row="${index + 1}"]`).checked = row.active;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error("Lỗi tải dữ liệu LocalStorage:", e);
+                }
+            }
+
+            function saveSettings(gridData) {
+                const settingsToSave = {};
+                document.querySelectorAll('[data-save]').forEach(el => {
+                    if (el.type === 'checkbox') settingsToSave[el.dataset.save] = el.checked;
+                    else settingsToSave[el.dataset.save] = el.value;
+                });
+                
+                localStorage.setItem('pvp_game_settings', JSON.stringify(settingsToSave));
+                if (gridData) localStorage.setItem('pvp_game_data', JSON.stringify(gridData));
+            }
+
+            // ========================================================
+            // ⚓ [NEO 0]: HỆ THỐNG ÂM THANH & CẤU HÌNH NGOÀI
+            // ========================================================
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // ✂️ CẤU HÌNH MP3 NGOÀI & VOLUME ✂️
+            const EXTERNAL_AUDIO_VOLUMES = {
+                kamehameha: 0.3,
+                welcome: 0.6,
+                defeated: 0.6,
+                win: 0.5,
+                mainTheme: 0.4,     // Cài đặt âm lượng Nhạc nền chính (0.0 đến 1.0)
+                suddenDeath: 0.6    // Cài đặt âm lượng Nhạc Sudden Death (0.0 đến 1.0)
+            };
+
+            let realKameAudio = new Audio('audiokamekameha.mp3');
+            realKameAudio.volume = EXTERNAL_AUDIO_VOLUMES.kamehameha; 
+            
+            let welcomeAudio = new Audio('Welcome.mp3');
+            welcomeAudio.volume = EXTERNAL_AUDIO_VOLUMES.welcome;
+
+            let defeatedAudio = new Audio('Defeated.mp3');
+            defeatedAudio.volume = EXTERNAL_AUDIO_VOLUMES.defeated;
+
+            let winAudio = new Audio('Win-battle.mp3');
+            winAudio.volume = EXTERNAL_AUDIO_VOLUMES.win;
+            winAudio.loop = true; // Loop vô tận
+            
+            let mainThemeAudio = new Audio('Main-theme.mp3');
+            mainThemeAudio.volume = EXTERNAL_AUDIO_VOLUMES.mainTheme;
+            mainThemeAudio.loop = true; // Loop vô tận cho đến khi Sudden Death
+            
+            let suddenDeathAudio = new Audio('Sudden-death.mp3');
+            suddenDeathAudio.volume = EXTERNAL_AUDIO_VOLUMES.suddenDeath;
+            suddenDeathAudio.loop = true; // Loop vô tận cho đến khi Game Over
+
+            let isRealAudioWorking = true;
+            realKameAudio.onerror = () => { isRealAudioWorking = false; };
+            
+            function playSound(effectType) {
+                if (!effectType) return; 
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const gain = audioCtx.createGain();
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                function createExplosion(duration, bassFreq, volume) {
+                    const bufferSize = Math.floor(audioCtx.sampleRate * duration); 
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    
+                    const noiseFilter = audioCtx.createBiquadFilter();
+                    noiseFilter.type = 'lowpass';
+                    noiseFilter.frequency.setValueAtTime(1000, now);
+                    noiseFilter.frequency.exponentialRampToValueAtTime(50, now + duration);
+                    
+                    noise.connect(noiseFilter);
+                    noiseFilter.connect(gain);
+                    noise.start(now);
+
+                    const osc = audioCtx.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(bassFreq, now);
+                    osc.frequency.exponentialRampToValueAtTime(10, now + duration);
+                    osc.connect(gain);
+                    osc.start(now);
+                    osc.stop(now + duration);
+
+                    gain.gain.setValueAtTime(volume, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                }
+
+                function createTone(type, freqStart, freqEnd, duration, volume) {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freqStart, now);
+                    if(freqEnd) osc.frequency.exponentialRampToValueAtTime(freqEnd, now + duration);
+                    
+                    osc.connect(gain);
+                    gain.gain.setValueAtTime(volume, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                    
+                    osc.start(now);
+                    osc.stop(now + duration);
+                }
+
+                switch(effectType) {
+                    case 'meteor_fall': createTone('sawtooth', 300, 50, 0.3, 0.1); break;
+                    case 'meteor_giant': createTone('sawtooth', 150, 20, 0.6, 0.3); break;
+                    case 'heavy_hit': createExplosion(1.5, 80, 0.5); break; 
+                    case 'epic_explosion': 
+                        createExplosion(2.5, 50, 0.8); 
+                        createTone('square', 100, 20, 1.0, 0.4); 
+                        break;
+                    case 'burn': createTone('sawtooth', 100, 10, 0.4, 0.1); break;
+                    case 'freeze': createTone('square', 800, 200, 0.3, 0.05); break;
+                    case 'stun': createTone('triangle', 400, 600, 0.4, 0.1); break;
+                    case 'poison': createTone('square', 150, 50, 0.6, 0.1); break;
+                    case 'reflect': createTone('sine', 600, 800, 0.2, 0.1); break;
+                    case 'paralyze': createTone('sawtooth', 300, 100, 0.1, 0.1); break;
+                    case 'sleep': createTone('sine', 200, 100, 0.8, 0.1); break;
+                    case 'draw_skill': createTone('sine', 400, 800, 0.15, 0.1); break;
+                    case 'correct': 
+                        // Âm thanh giống nhặt vàng Mario (B5 -> E6)
+                        createTone('square', 987, 987, 0.08, 0.1); 
+                        setTimeout(() => createTone('sine', 1318, 1318, 0.4, 0.2), 80);
+                        break;
+                    case 'wrong': 
+                        createTone('sawtooth', 150, 50, 0.4, 0.3); // Gắt hơn một chút
+                        break;
+                    case 'kame_charge':
+                        const chargeOsc = audioCtx.createOscillator();
+                        chargeOsc.type = 'sine';
+                        chargeOsc.frequency.setValueAtTime(200, now);
+                        chargeOsc.frequency.exponentialRampToValueAtTime(1500, now + 1.5);
+                        chargeOsc.connect(gain);
+                        gain.gain.setValueAtTime(0.01, now);
+                        gain.gain.linearRampToValueAtTime(0.2, now + 1.5);
+                        chargeOsc.start(now);
+                        chargeOsc.stop(now + 1.5);
+                        break;
+                    case 'kame_blast': createExplosion(2.0, 150, 0.4); break;
+                    case 'bow_shoot': createTone('triangle', 800, 100, 0.15, 0.2); break;
+                    case 'shield_hit_bloop': createTone('sine', 300, 800, 0.15, 0.5); break; 
+                    case 'hp_hit': 
+                        const bs = Math.floor(audioCtx.sampleRate * 0.2); 
+                        const b = audioCtx.createBuffer(1, bs, audioCtx.sampleRate);
+                        const d = b.getChannelData(0);
+                        for (let i = 0; i < bs; i++) d[i] = Math.random() * 2 - 1;
+                        const n = audioCtx.createBufferSource();
+                        n.buffer = b;
+                        const nf = audioCtx.createBiquadFilter();
+                        nf.type = 'lowpass'; nf.frequency.setValueAtTime(800, now);
+                        n.connect(nf); nf.connect(gain);
+                        gain.gain.setValueAtTime(0.4, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                        n.start(now);
+                        createTone('square', 150, 50, 0.2, 0.3); 
+                        break;
+                    case 'heal': createTone('sine', 400, 1200, 0.6, 0.2); break;
+                    case 'deflect': createTone('sine', 800, 200, 0.1, 0.3); break;
+                }
+            }
+
+            // ========================================================
+            // ⚓ [NEO 1]: HÀM BỔ TRỢ ĐẺ ICON/TEXT (FLOATING ICONS)
+            // ========================================================
+            const WEAPON_ASSETS = {
+                '🏹': { type: 'straight', content: '🏹' },
+                '🪃': { type: 'spin', content: '🪃' },
+                '🍌': { type: 'spin', content: '🍌' },
+                '🩴': { type: 'spin', content: '🩴' },
+                '🦖': { type: 'animal', content: '🦖' },
+                '🐡': { type: 'spin', content: '🐡' },
+                '🦈': { type: 'animal', content: '🦈' },
+                '🐱': { type: 'animal', content: '🐱' },
+                'omelette': { type: 'spin', content: '<svg viewBox="0 0 100 100" width="30" height="30" style="filter: drop-shadow(0px 3px 3px rgba(0,0,0,0.4));"><path d="M 50 15 C 65 15, 75 5, 85 15 C 95 25, 100 45, 90 55 C 95 70, 80 85, 65 85 C 50 95, 30 90, 20 75 C 5 70, 5 50, 15 35 C 10 20, 30 10, 50 15 Z" fill="#fff"/><circle cx="50" cy="50" r="22" fill="#FFC107"/><circle cx="45" cy="45" r="6" fill="#FFD54F"/></svg>' }
+            };
+
+            window.spawnFloatingText = function(targetElement, text, amount, duration, startScale = 1, endScale = 1.5, offsetRange = 60, specificColor = null) {
+                const rect = targetElement.getBoundingClientRect();
+                const targetX = rect.left + rect.width / 2 + window.scrollX;
+                const targetY = rect.top + rect.height / 2 + window.scrollY;
+                for(let i = 0; i < amount; i++) {
+                    const item = document.createElement('div');
+                    item.innerText = text;
+                    item.style.position = 'absolute';
+                    item.style.left = (targetX - 15) + 'px'; 
+                    item.style.top = (targetY - 15) + 'px';
+                    item.style.fontSize = '35px'; 
+                    item.style.fontFamily = 'Arial, sans-serif';
+                    item.style.fontWeight = '900'; 
+                    if(specificColor) item.style.color = specificColor;
+                    item.style.textShadow = '0 0 5px black';
+                    item.style.zIndex = '10000';
+                    item.style.pointerEvents = 'none';
+                    document.body.appendChild(item);
+                    
+                    const endX = (Math.random() - 0.5) * (offsetRange / 2);
+                    const endY = -offsetRange - 80; 
+                    
+                    item.animate([
+                        { transform: `translate(0px, 0px) scale(${startScale})`, opacity: 1 },
+                        { transform: `translate(${endX}px, ${endY}px) scale(${endScale})`, opacity: 0 }
+                    ], { duration: duration + Math.random() * 200, easing: 'ease-out' }).onfinish = () => item.remove();
+                }
+            };
+
+            window.takeDamage = function(targetPrefix, amount) {
+                let state = window.GameplayManager.state;
+                let target = state[targetPrefix];
+                let dmg = amount;
+                let hitShield = false;
+                let hitHP = false;
+
+                if (target.shield > 0) {
+                    hitShield = true;
+                    if (target.shield >= dmg) {
+                        target.shield -= dmg;
+                        dmg = 0; 
+                    } else {
+                        dmg -= target.shield; 
+                        target.shield = 0;
+                    }
+                }
+
+                if (dmg > 0) {
+                    hitHP = true;
+                    target.hp = Math.max(0, target.hp - dmg);
+                }
+
+                window.GameplayManager.updateUI();
+
+                const targetAvatarBox = document.getElementById(`${targetPrefix}-avatar-box`);
+                const targetAvatarInner = document.getElementById(`${targetPrefix}-avatar-inner`) || targetAvatarBox; 
+                
+                if (hitShield) {
+                    playSound('shield_hit_bloop');
+                    const bubble = document.getElementById(`${targetPrefix}-shield-bubble`);
+                    if(bubble) bubble.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.95)' }, { transform: 'scale(1)' }], { duration: 150 });
+                }
+                
+                if (hitHP) {
+                    playSound('hp_hit');
+                    targetAvatarInner.animate([{ transform: 'translate(0, 0)' }, { transform: 'translate(-5px, 5px)' }, { transform: 'translate(5px, -5px)' }, { transform: 'translate(0, 0)' }], { duration: 150 });
+                    spawnFloatingIcons(targetAvatarBox, ['😭', '😢', '😰', '💢'], 3, 1500, 0.5, 2.5, 150);
+                    window.spawnFloatingText(targetAvatarBox, `-${Math.round(dmg)}`, 1, 1000, 1.5, 0.5, 60, '#e74c3c');
+                }
+
+                if (target.hp <= 0 && window.GameplayManager.state.isPlaying) {
+                    window.triggerEndGame(targetPrefix === 'p1' ? 'p2' : 'p1');
+                }
+
+                return { hitShield: hitShield, hitHP: hitHP };
+            };
+
+            window.fireConfetti = function() {
+                const container = document.getElementById('confetti-container');
+                container.innerHTML = '';
+                const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#4ade80', '#60a5fa'];
+                for(let i=0; i<150; i++) {
+                    let conf = document.createElement('div');
+                    conf.style.position = 'absolute';
+                    conf.style.width = (Math.random() * 10 + 5) + 'px';
+                    conf.style.height = (Math.random() * 20 + 10) + 'px';
+                    conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    conf.style.left = Math.random() * 100 + '%';
+                    conf.style.top = '-20px';
+                    conf.style.opacity = Math.random() + 0.5;
+                    conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(conf);
+
+                    conf.animate([
+                        { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+                        { transform: `translate(${(Math.random() - 0.5)*300}px, ${window.innerHeight}px) rotate(${Math.random() * 1080}deg)`, opacity: 0 }
+                    ], { duration: 1500 + Math.random() * 2000, easing: 'cubic-bezier(.37,0,.63,1)' });
+                }
+            };
+
+            // HÀM LƯU LỊCH SỬ HALL OF FAME
+            function saveMatchToHistory(winnerPrefix, durationStr) {
+                let p1Name = window.GameplayManager.state.p1.name || 'HERO';
+                let p2Name = window.GameplayManager.state.p2.name || 'BOSS';
+                let p1Avatar = document.getElementById('p1-avatar-inner').innerHTML;
+                let p2Avatar = document.getElementById('p2-avatar-inner').innerHTML;
+
+                let matchRecord = {
+                    time: new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
+                    duration: durationStr,
+                    p1: { name: p1Name, avatar: p1Avatar, isWinner: winnerPrefix === 'p1' },
+                    p2: { name: p2Name, avatar: p2Avatar, isWinner: winnerPrefix === 'p2' }
+                };
+
+                let history = JSON.parse(localStorage.getItem('pvp_match_history') || '[]');
+                history.unshift(matchRecord); // Thêm vào đầu
+                if(history.length > 20) history.pop(); // Giữ tối đa 20 trận
+                localStorage.setItem('pvp_match_history', JSON.stringify(history));
+                
+                renderHallOfFame();
+            }
+
+            function renderHallOfFame() {
+                let history = JSON.parse(localStorage.getItem('pvp_match_history') || '[]');
+                let tbody = document.getElementById('history-tbody');
+                tbody.innerHTML = '';
+                
+                history.forEach(match => {
+                    let tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-700/30 transition-colors";
+                    
+                    let p1Style = match.p1.isWinner ? 'text-blue-400 font-bold drop-shadow-[0_0_5px_blue]' : 'text-slate-500 grayscale opacity-60';
+                    let p2Style = match.p2.isWinner ? 'text-red-400 font-bold drop-shadow-[0_0_5px_red]' : 'text-slate-500 grayscale opacity-60';
+                    
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-slate-400">
+                            <span class="block text-xs">${match.time}</span>
+                            <span class="block text-[10px] text-yellow-500 font-mono">⏱️ ${match.duration}</span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <div class="flex items-center gap-2 ${p1Style}">
+                                <div class="w-8 h-8 rounded-full overflow-hidden border border-current shrink-0">${match.p1.avatar}</div>
+                                <span>${match.p1.name}</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-center text-slate-600 font-black text-xs">VS</td>
+                        <td class="px-4 py-3 whitespace-nowrap">
+                            <div class="flex items-center justify-end gap-2 ${p2Style}">
+                                <span>${match.p2.name}</span>
+                                <div class="w-8 h-8 rounded-full overflow-hidden border border-current shrink-0">${match.p2.avatar}</div>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('btn-clear-history').addEventListener('click', () => {
+                if(confirm("Bạn có chắc muốn xóa toàn bộ lịch sử đấu?")) {
+                    localStorage.removeItem('pvp_match_history');
+                    renderHallOfFame();
+                }
+            });
+
+            window.triggerEndGame = function(winnerPrefix) {
+                window.GameplayManager.state.isPlaying = false;
+                
+                // Tắt các nhạc nền đang chạy trong trận
+                mainThemeAudio.pause();
+                suddenDeathAudio.pause();
+
+                // Phát âm thanh Defeated
+                defeatedAudio.currentTime = 0;
+                defeatedAudio.play().catch(e => console.log("Cần tương tác để phát âm thanh"));
+
+                let loserPrefix = winnerPrefix === 'p1' ? 'p2' : 'p1';
+                let winnerBox = document.getElementById(`${winnerPrefix}-avatar-box`);
+                let loserBox = document.getElementById(`${loserPrefix}-avatar-box`);
+
+                // 1. Kẻ thua: Xám xịt, văng khóc
+                loserBox.style.transition = 'all 1s ease';
+                loserBox.style.filter = 'grayscale(100%) brightness(0.5)';
+                loserBox.style.transform = 'scale(0.8) translateY(40px) rotate(-15deg)';
+                spawnFloatingIcons(loserBox, ['😭', '💢', '💦'], 10, 2000, 1, 2, 100);
+
+                // 2. Hoạt ảnh Linh hồn & Đầu lâu
+                const rect = loserBox.getBoundingClientRect();
+                const targetX = rect.left + rect.width / 2 + window.scrollX;
+                const targetY = rect.top + rect.height / 2 + window.scrollY;
+
+                // Linh hồn bay lên
+                let ghost = document.createElement('div');
+                ghost.innerText = '👻';
+                ghost.style.position = 'absolute';
+                ghost.style.left = (targetX - 30) + 'px';
+                ghost.style.top = (targetY - 30) + 'px';
+                ghost.style.fontSize = '60px';
+                ghost.style.zIndex = '5000';
+                ghost.style.pointerEvents = 'none';
+                ghost.style.filter = 'drop-shadow(0 0 10px cyan)';
+                document.body.appendChild(ghost);
+
+                ghost.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 0 },
+                    { transform: 'translate(0, -50px) scale(1.2) rotate(10deg)', opacity: 1, offset: 0.3 },
+                    { transform: 'translate(0, -150px) scale(1.5) rotate(-10deg)', opacity: 0 }
+                ], { duration: 2000, easing: 'ease-out' }).onfinish = () => {
+                    ghost.remove();
+                    
+                    // Đầu lâu nổ bùm
+                    let skull = document.createElement('div');
+                    skull.innerText = '☠️';
+                    skull.style.position = 'absolute';
+                    skull.style.left = (targetX - 50) + 'px';
+                    skull.style.top = (targetY - 180) + 'px';
+                    skull.style.fontSize = '100px';
+                    skull.style.zIndex = '5000';
+                    skull.style.pointerEvents = 'none';
+                    document.body.appendChild(skull);
+
+                    skull.animate([
+                        { transform: 'scale(0.5)', opacity: 1 },
+                        { transform: 'scale(2)', opacity: 1, offset: 0.5 },
+                        { transform: 'scale(3)', opacity: 0 }
+                    ], { duration: 800 }).onfinish = () => skull.remove();
+                };
+
+                // 3. Người thắng: Chờ linh hồn bay xong (2 giây) rồi mới Zoom in & Pháo hoa
+                setTimeout(() => {
+                    // Nhạc chiến thắng
+                    winAudio.currentTime = 0;
+                    winAudio.play().catch(e => console.log(e));
+
+                    winnerBox.style.transition = 'all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    winnerBox.style.zIndex = '5000';
+                    winnerBox.style.borderRadius = '50%'; // Đảm bảo box-shadow hình tròn
+                    winnerBox.style.boxShadow = '0 0 100px 30px rgba(255, 215, 0, 0.9)';
+                    winnerBox.style.transform = 'scale(2.5) translateY(-20px)';
+                    
+                    // Hiện Modal End Game
+                    setTimeout(() => {
+                        document.getElementById('endgame-modal').classList.remove('hidden');
+                        let winnerName = window.GameplayManager.state[winnerPrefix].name || (winnerPrefix === 'p1' ? 'HERO' : 'BOSS');
+                        document.getElementById('winner-title').innerText = `${winnerName} WINS!`;
+                        document.getElementById('winner-avatar').innerHTML = document.getElementById(`${winnerPrefix}-avatar-inner`).innerHTML;
+                        
+                        // Lưu lịch sử
+                        let elapsedTotalSec = Math.floor((Date.now() - window.GameplayManager.state.matchStartTime) / 1000);
+                        let mins = Math.floor(elapsedTotalSec / 60).toString().padStart(2, '0');
+                        let secs = (elapsedTotalSec % 60).toString().padStart(2, '0');
+                        saveMatchToHistory(winnerPrefix, `${mins}:${secs}`);
+
+                        window.fireConfetti();
+                    }, 1000);
+                }, 2000);
+            };
+
+            window.applyHealOverTime = function(caster, totalAmount, durationMs) {
+                let state = window.GameplayManager.state;
+                let player = state[caster];
+
+                const targetAvatarBox = document.getElementById(`${caster}-avatar-box`);
+                const targetAvatarInner = document.getElementById(`${caster}-avatar-inner`) || targetAvatarBox;
+                
+                targetAvatarInner.animate([
+                    { boxShadow: '0 0 0px 0px rgba(46, 204, 113, 0)' },
+                    { boxShadow: '0 0 25px 15px rgba(46, 204, 113, 0.8)' },
+                    { boxShadow: '0 0 0px 0px rgba(46, 204, 113, 0)' }
+                ], { duration: 1000, iterations: 3 }); 
+
+                const ticks = 10; 
+                const tickInterval = durationMs / ticks;
+                const amountPerTick = totalAmount / ticks;
+                let currentTick = 0;
+
+                const healTimer = setInterval(() => {
+                    if (!state.isPlaying) { clearInterval(healTimer); return; }
+                    player.hp = Math.min(player.maxHp, player.hp + amountPerTick);
+                    window.GameplayManager.updateUI();
+                    currentTick++;
+                    if (currentTick >= ticks) clearInterval(healTimer);
+                }, tickInterval);
+
+                const plusTimer = setInterval(() => {
+                    if (!state.isPlaying) { clearInterval(plusTimer); return; }
+                    window.spawnFloatingText(targetAvatarBox, '+', 1, 1000, 1.5, 0.5, 60, '#2ecc71');
+                }, durationMs / 5);
+
+                setTimeout(() => { clearInterval(plusTimer); }, durationMs);
+            };
+
+            window.createDeflectedProjectile = function(startX, startY, weaponValue, isMovingRight) {
+                const weaponData = WEAPON_ASSETS[weaponValue] || { type: 'straight', content: weaponValue };
+                const def = document.createElement('div');
+                def.innerHTML = weaponData.content;
+                def.style.position = 'absolute';
+                def.style.fontSize = '30px';
+                def.style.zIndex = '10000';
+                def.style.pointerEvents = 'none';
+                def.style.left = startX + 'px';
+                def.style.top = startY + 'px';
+                def.style.filter = 'grayscale(30%) brightness(1.5)'; 
+                let flipScale = weaponData.type === 'animal' ? (isMovingRight ? 'scaleX(-1)' : 'scaleX(1)') : '';
+                document.body.appendChild(def);
+                playSound('deflect');
+
+                const bounceDirection = isMovingRight ? -1 : 1; 
+                const flyX = bounceDirection * (100 + Math.random() * 100); 
+                const flyY = -100 + Math.random() * 250; 
+
+                def.animate([
+                    { transform: `translate(-50%, -50%) ${flipScale} rotate(0deg) scale(1)`, opacity: 1 },
+                    { transform: `translate(calc(-50% + ${flyX}px), calc(-50% + ${flyY}px)) ${flipScale} rotate(${Math.random() * 1080}deg) scale(0.5)`, opacity: 0 }
+                ], { duration: 400 + Math.random() * 200, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' }).onfinish = () => def.remove();
+            };
+
+            window.playWeaponBarrage = function(attacker, target) {
+                const attackerAvatar = document.getElementById(`${attacker}-avatar-box`);
+                const targetAvatar = document.getElementById(`${target}-avatar-box`);
+
+                const startX = attackerAvatar.getBoundingClientRect().left + attackerAvatar.offsetWidth / 2 + window.scrollX;
+                const startY = attackerAvatar.getBoundingClientRect().top + attackerAvatar.offsetHeight / 2 + window.scrollY;
+                const targetCenterX = targetAvatar.getBoundingClientRect().left + targetAvatar.offsetWidth / 2 + window.scrollX;
+                const targetCenterY = targetAvatar.getBoundingClientRect().top + targetAvatar.offsetHeight / 2 + window.scrollY;
+
+                const weaponValue = attacker === 'p1' ? '🏹' : '🩴'; 
+                const weaponData = WEAPON_ASSETS[weaponValue] || { type: 'straight', content: weaponValue };
+                const isSpinning = weaponData.type === 'spin';
+                const isAnimal = weaponData.type === 'animal';
+                const isMovingRight = startX < targetCenterX;
+
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        playSound('bow_shoot'); 
+                        let finalTargetX, finalTargetY;
+                        let targetShield = window.GameplayManager.state[target].shield;
+                        
+                        if (targetShield > 0) {
+                            const baseAngleBack = Math.atan2(startY - targetCenterY, startX - targetCenterX);
+                            const angleVariance = (Math.random() - 0.5) * 1.5; 
+                            const finalAngle = baseAngleBack + angleVariance;
+                            const shieldRadius = 90; 
+                            finalTargetX = targetCenterX + Math.cos(finalAngle) * shieldRadius;
+                            finalTargetY = targetCenterY + Math.sin(finalAngle) * shieldRadius;
+                        } else {
+                            const variance = 50; 
+                            finalTargetX = targetCenterX + (Math.random() * variance * 2 - variance);
+                            finalTargetY = targetCenterY + (Math.random() * variance * 2 - variance);
+                        }
+
+                        const projectile = document.createElement('div');
+                        projectile.innerHTML = weaponData.content;
+                        projectile.style.position = 'absolute';
+                        projectile.style.fontSize = '30px';
+                        projectile.style.zIndex = '10000';
+                        projectile.style.pointerEvents = 'none';
+                        document.body.appendChild(projectile);
+
+                        const travelAngle = Math.atan2(finalTargetY - startY, finalTargetX - startX);
+                        const pointAngle = travelAngle * (180 / Math.PI) + 45; 
+
+                        let startTransform, endTransform;
+                        if (isSpinning) {
+                            startTransform = `translate(-50%, -50%) rotate(0deg)`;
+                            endTransform = `translate(-50%, -50%) rotate(${1080 * (Math.random() > 0.5 ? 1 : -1)}deg)`;
+                        } else if (isAnimal) {
+                            let faceScale = isMovingRight ? 'scaleX(-1)' : 'scaleX(1)';
+                            startTransform = `translate(-50%, -50%) ${faceScale}`;
+                            endTransform = `translate(-50%, -50%) ${faceScale}`;
+                        } else {
+                            startTransform = `translate(-50%, -50%) rotate(${pointAngle}deg)`;
+                            endTransform = `translate(-50%, -50%) rotate(${pointAngle}deg)`;
+                        }
+
+                        const anim = projectile.animate([
+                            { transform: startTransform, left: startX+'px', top: startY+'px' },
+                            { transform: endTransform, left: finalTargetX+'px', top: finalTargetY+'px' }
+                        ], { duration: 450 + Math.random() * 200, easing: 'ease-out' });
+
+                        anim.onfinish = () => {
+                            projectile.remove();
+                            let atkDmg = parseFloat(document.getElementById(attacker === 'p1' ? 'hero-mana-atk' : 'boss-mana-atk')?.value) || 10;
+                            let dmgPerHit = atkDmg / 8; 
+                            const result = window.takeDamage(target, dmgPerHit); 
+                            
+                            if (result.hitShield) {
+                                window.createDeflectedProjectile(finalTargetX, finalTargetY, weaponValue, isMovingRight);
+                            }
+                        };
+                    }, i * 100); 
+                }
+            };
+
+            window.triggerCooldownUI = function(btnId, txtId, cooldownSeconds) {
+                const btn = document.getElementById(btnId);
+                if (!btn || btn.classList.contains('on-cd')) return false; 
+                const ring = btn.querySelector('.cd-ring');
+                const overlay = btn.querySelector('.cd-overlay');
+                const text = document.getElementById(txtId);
+
+                btn.classList.add('on-cd');
+                ring.style.display = 'block'; overlay.style.display = 'block'; text.style.display = 'flex';
+
+                const durationMs = cooldownSeconds * 1000;
+                const startTime = performance.now();
+
+                function updateFrame(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const remaining = Math.max(0, durationMs - elapsed);
+                    text.innerText = (remaining / 1000).toFixed(1);
+                    ring.style.setProperty('--p', `${(elapsed / durationMs) * 100}%`);
+                    if (remaining > 0) requestAnimationFrame(updateFrame);
+                    else {
+                        btn.classList.remove('on-cd');
+                        ring.style.display = 'none'; overlay.style.display = 'none'; text.style.display = 'none';
+                        btn.classList.add('cd-ready-flash');
+                        setTimeout(() => btn.classList.remove('cd-ready-flash'), 500);
+                    }
+                }
+                requestAnimationFrame(updateFrame);
+                return true; 
+            };
+
+            window.useBasicSkill = function(caster, skillType) {
+                if (!window.GameplayManager || !window.GameplayManager.state.isPlaying) return;
+                
+                let state = window.GameplayManager.state[caster];
+                if (state.isFrozen || state.isStunned) {
+                    playSound('wrong'); 
+                    return;
+                }
+                
+                let cdSec = 3;
+                if (skillType === 'atk') cdSec = parseFloat(document.getElementById('setting_cd_atk')?.value) || 3;
+                if (skillType === 'def') cdSec = parseFloat(document.getElementById('setting_cd_def')?.value) || 5;
+                if (skillType === 'heal') cdSec = parseFloat(document.getElementById('setting_cd_heal')?.value) || 8;
+
+                const btnId = `btn-${caster}-${skillType}`;
+                const txtId = `cd-txt-${caster}-${skillType}`;
+
+                if (window.triggerCooldownUI(btnId, txtId, cdSec)) {
+                    let target = caster === 'p1' ? 'p2' : 'p1';
+                    
+                    if (skillType === 'atk') {
+                        window.playWeaponBarrage(caster, target);
+                    } 
+                    else if (skillType === 'def') {
+                        playSound('shield_hit_bloop'); 
+                        let defAmount = parseFloat(document.getElementById(caster === 'p1' ? 'hero-mana-def' : 'boss-mana-def')?.value) || 10;
+                        let maxShield = parseFloat(document.getElementById(caster === 'p1' ? 'hero-max-shield' : 'boss-max-shield')?.value) || 100;
+                        
+                        // Cộng dồn shield, nhưng không vượt qua Max Shield
+                        state.shield = Math.min(state.shield + defAmount, maxShield);
+                        
+                        window.GameplayManager.updateUI();
+                    }
+                    else if (skillType === 'heal') {
+                        playSound('heal');
+                        let healAmt = parseFloat(document.getElementById(caster === 'p1' ? 'hero-mana-heal' : 'boss-mana-heal')?.value) || 15;
+                        window.applyHealOverTime(caster, healAmt, 3000); 
+                    }
+                }
+            };
+
+            function spawnFloatingIcons(targetElement, itemsArray, amount, duration, startScale = 1, endScale = 1.5, offsetRange = 60) {
+                const rect = targetElement.getBoundingClientRect();
+                const targetX = rect.left + rect.width / 2 + window.scrollX;
+                const targetY = rect.top + rect.height / 2 + window.scrollY;
+
+                for(let i = 0; i < amount; i++) {
+                    const item = document.createElement('div');
+                    item.innerText = itemsArray[Math.floor(Math.random() * itemsArray.length)];
+                    item.style.position = 'absolute';
+                    item.style.left = (targetX - 20) + 'px'; 
+                    item.style.top = (targetY - 20) + 'px';
+                    item.style.fontSize = (20 + Math.random() * 10) + 'px';
+                    item.style.fontWeight = 'bold'; 
+                    item.style.color = '#fff';
+                    item.style.textShadow = '0 0 5px black'; 
+                    item.style.zIndex = '10000';
+                    item.style.pointerEvents = 'none';
+                    document.body.appendChild(item);
+
+                    const endX = (Math.random() - 0.5) * offsetRange;
+                    const endY = (Math.random() - 0.5) * offsetRange - 50; 
+
+                    item.animate([
+                        { transform: `translate(0px, 0px) scale(${startScale}) rotate(0deg)`, opacity: 1 },
+                        { transform: `translate(${endX}px, ${endY}px) scale(${endScale}) rotate(${Math.random()*360}deg)`, opacity: 0 }
+                    ], { duration: duration + Math.random() * 200, easing: 'ease-out' }).onfinish = () => item.remove();
+                }
+            }
+
+            // ========================================================
+            // ⚓ [NEO 2]: TỔNG ĐÀI HIỆU ỨNG NHẬN SÁT THƯƠNG
+            // ========================================================
+            function triggerStatusEffect(targetElement, targetPrefix, effectType, effectDuration = 3000, isHeavyHit = false) {
+                if (!targetElement) return;
+
+                playSound(effectType);
+                if (isHeavyHit) playSound('heavy_hit'); 
+
+                if (isHeavyHit) {
+                    document.body.animate([
+                        { transform: 'translate(0, 0) scale(1)' },
+                        { transform: 'translate(-25px, 20px) scale(1.02)' },
+                        { transform: 'translate(25px, -25px) scale(1.01)' },
+                        { transform: 'translate(0, 0) scale(1)' }
+                    ], { duration: 600, easing: 'ease-out' });
+                } else if(effectType) { 
+                    document.body.animate([
+                        { transform: 'translate(0, 0)' },
+                        { transform: 'translate(-5px, 5px)' },
+                        { transform: 'translate(5px, -5px)' },
+                        { transform: 'translate(0, 0)' }
+                    ], { duration: 150 });
+                }
+
+                if (targetElement.effectIntervalId) {
+                    clearInterval(targetElement.effectIntervalId);
+                }
+
+                targetElement.style.borderRadius = '50%';
+
+                switch(effectType) {
+                    case 'burn':
+                        targetElement.style.backgroundColor = 'rgba(255, 69, 0, 0.5)'; 
+                        targetElement.style.boxShadow = 'inset 0 0 30px red, 0 0 20px orange';
+                        setTimeout(() => { targetElement.style.backgroundColor = ''; targetElement.style.boxShadow = ''; }, effectDuration);
+                        break;
+                    case 'poison':
+                        targetElement.style.backgroundColor = 'rgba(50, 205, 50, 0.5)'; 
+                        targetElement.style.boxShadow = 'inset 0 0 30px green';
+                        
+                        targetElement.effectIntervalId = setInterval(() => { 
+                            spawnFloatingIcons(targetElement, ['🤢', '🤮', '🫧'], 2, 1000); 
+                            targetElement.style.opacity = '0.5';
+                            setTimeout(() => targetElement.style.opacity = '1', 200);
+                        }, 1000);
+                        
+                        setTimeout(() => { 
+                            clearInterval(targetElement.effectIntervalId);
+                            targetElement.style.backgroundColor = ''; 
+                            targetElement.style.boxShadow = ''; 
+                        }, effectDuration);
+                        break;
+                    case 'stun':
+                        targetElement.animate([ { transform: 'translate(-3px, 0)' }, { transform: 'translate(3px, 0)' } ], { duration: 100, iterations: 10 }); 
+                        spawnFloatingIcons(targetElement, ['⭐', '💫', '✨'], 4, 1000, 1, 1.2, 80);
+                        break;
+                    case 'reflect':
+                        spawnFloatingIcons(targetElement, ['Haha! 😂', 'Lêu lêu! 😜', 'Non! 🤣'], 3, 1200, 1, 1.5, 100);
+                        setTimeout(() => spawnFloatingIcons(targetElement, ['🤣', '😂', '👎'], 2, 1000), 300);
+                        break;
+                    case 'paralyze':
+                        targetElement.style.backgroundColor = '#FFD700';
+                        setTimeout(() => targetElement.style.backgroundColor = '', effectDuration);
+                        break;
+                    case 'freeze':
+                        targetElement.style.backgroundColor = 'rgba(0, 255, 255, 0.3)'; 
+                        targetElement.style.boxShadow = 'inset 0 0 30px cyan, 0 0 15px cyan';
+                        targetElement.classList.add('icy-spikes'); 
+                        
+                        if (targetPrefix === 'p1') isP1Frozen = true;
+                        if (targetPrefix === 'p2') isP2Frozen = true;
+                        
+                        let actionBox = document.getElementById(`actions-${targetPrefix}`);
+                        if(actionBox) {
+                            actionBox.classList.add('frozen-ui', 'icy-spikes');
+                        }
+
+                        targetElement.effectIntervalId = setInterval(() => { 
+                            spawnFloatingIcons(targetElement, ['❄️', '🧊'], 2, 800); 
+                        }, 1000);
+
+                        setTimeout(() => { 
+                            clearInterval(targetElement.effectIntervalId);
+                            targetElement.style.backgroundColor = ''; 
+                            targetElement.style.boxShadow = ''; 
+                            targetElement.classList.remove('icy-spikes');
+                            
+                            if (targetPrefix === 'p1') isP1Frozen = false;
+                            if (targetPrefix === 'p2') isP2Frozen = false;
+                            
+                            if(actionBox) {
+                                actionBox.classList.remove('frozen-ui', 'icy-spikes');
+                            }
+                        }, effectDuration);
+                        break;
+                }
+            }
+
+            // ========================================================
+            // ⚓ [NEO 3]: KHU VỰC THIẾT KẾ CÁC KỸ NĂNG (SKILLS)
+            // ========================================================
+            function playMeteorShower(attackerPrefix, targetPrefix) {
+                const targetAvatar = document.getElementById(`${targetPrefix}-avatar-box`);
+                if (!targetAvatar) return;
+
+                const totalMeteors = 15;
+                const fastInterval = 80; 
+                
+                // 1. Thả 14 viên nhỏ liên tục
+                for (let i = 0; i < totalMeteors - 1; i++) {
+                    setTimeout(() => {
+                        createAndDropMeteor(targetAvatar, targetPrefix, false);
+                        playSound('meteor_fall');
+                    }, i * fastInterval); 
+                }
+
+                // 2. Tụ lực & Cảnh báo
+                const giantMeteorDelay = (totalMeteors - 1) * fastInterval + 350;
+                
+                setTimeout(() => {
+                    targetAvatar.animate([
+                        { boxShadow: '0 0 0px red' },
+                        { boxShadow: '0 0 50px red' },
+                        { boxShadow: '0 0 0px red' }
+                    ], { duration: 350, iterations: 1 });
+                }, giantMeteorDelay - 350);
+
+                // 3. Giáng viên khổng lồ thứ 15
+                setTimeout(() => {
+                    createAndDropMeteor(targetAvatar, targetPrefix, true);
+                    playSound('meteor_giant'); 
+                }, giantMeteorDelay);
+            }
+
+            function createAndDropMeteor(targetElement, targetPrefix, isGiant) {
+                const rect = targetElement.getBoundingClientRect();
+                const targetX = rect.left + rect.width / 2 + window.scrollX;
+                const targetY = rect.top + rect.height / 2 + window.scrollY;
+
+                const meteor = document.createElement('div');
+                meteor.innerText = '☄️';
+                meteor.style.position = 'absolute'; 
+                meteor.style.zIndex = '9999';
+                meteor.style.pointerEvents = 'none';
+
+                if (isGiant) {
+                    meteor.style.fontSize = '250px'; 
+                    meteor.style.filter = 'drop-shadow(0 0 20px #ff4500) brightness(1.5)';
+                } else {
+                    meteor.style.fontSize = '40px';
+                }
+
+                const startX = targetX + (Math.random() * 300 - 150);
+                const startY = targetY - (isGiant ? 600 : 400) - Math.random() * 100; 
+
+                meteor.style.left = startX + 'px';
+                meteor.style.top = startY + 'px';
+                meteor.style.transform = 'translate(-50%, -50%)'; 
+                
+                document.body.appendChild(meteor);
+
+                const angle = Math.atan2(targetY - startY, targetX - startX) * (180 / Math.PI);
+                const adjustAngle = angle - 135; 
+                
+                const fallDuration = isGiant ? 600 : (150 + Math.random() * 100);
+
+                const animation = meteor.animate([
+                    { transform: `translate(-50%, -50%) rotate(${adjustAngle}deg) scale(0.5)`, opacity: 0 },
+                    { transform: `translate(-50%, -50%) rotate(${adjustAngle}deg) scale(1)`, opacity: 1, offset: 0.1 },
+                    { transform: `translate(calc(-50% + ${targetX - startX}px), calc(-50% + ${targetY - startY}px)) rotate(${adjustAngle}deg) scale(1)`, opacity: 1 } 
+                ], {
+                    duration: fallDuration,
+                    easing: 'ease-in'
+                });
+
+                animation.onfinish = () => {
+                    meteor.remove();
+                    
+                    let dmg = parseFloat(document.querySelector('[data-save="skill_3_dmg"]')?.value) || 5;
+                    
+                    if (isGiant) {
+                        playSound('epic_explosion'); 
+                        triggerStatusEffect(targetElement, targetPrefix, 'burn', 4000, true); 
+                        spawnFloatingIcons(targetElement, ['🪨', '⛰️', '💥', '💨'], 15, 1500, 1, 2.5, 120);
+                        // Deal burst damage for the giant one
+                        window.takeDamage(targetPrefix, dmg * 5);
+                    } else {
+                        triggerStatusEffect(targetElement, targetPrefix, 'burn', 300, false); 
+                        window.takeDamage(targetPrefix, dmg);
+                    }
+                };
+            }
+
+            function playKamehamehaAnimation(attackerPrefix, targetPrefix) {
+                const attackerAvatar = document.getElementById(`${attackerPrefix}-avatar-box`);
+                const targetAvatar = document.getElementById(`${targetPrefix}-avatar-box`);
+                if (!attackerAvatar || !targetAvatar) return;
+
+                const attRect = attackerAvatar.getBoundingClientRect();
+                const tarRect = targetAvatar.getBoundingClientRect();
+                
+                // Lấy chính xác Tâm của Avatar
+                const startX = attRect.left + attRect.width / 2 + window.scrollX;
+                const startY = attRect.top + attRect.height / 2 + window.scrollY;
+                const targetX = tarRect.left + tarRect.width / 2 + window.scrollX;
+                const targetY = tarRect.top + tarRect.height / 2 + window.scrollY;
+
+                const dx = targetX - startX;
+                const dy = targetY - startY;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                const isP1 = (attackerPrefix === 'p1');
+
+                if (isRealAudioWorking && realKameAudio.readyState >= 2) {
+                    realKameAudio.currentTime = 0; 
+                    realKameAudio.play().catch(e => console.log("Cần click vào màn hình để cho phép phát tiếng"));
+                } else {
+                    playSound('kame_charge'); 
+                }
+
+                // =========================================================================
+                const CHARGE_TIME = 2800; 
+                const BEAM_DURATION = 1800; 
+                const GIF_STAY_TIME = 1200; 
+                
+                const GIF_OFFSET_X = 0;
+                const GIF_OFFSET_Y = 0; 
+
+                const LASER_HEIGHT = 54; 
+                const LASER_OFFSET_X = isP1 ? 30 : -30; 
+                const LASER_OFFSET_Y = 0; 
+                // =========================================================================
+
+                const gif = document.createElement('img');
+                gif.src = 'kamekameha.gif'; 
+                gif.className = 'goku-gif';
+                
+                gif.onerror = function() {
+                    this.src = 'https://placehold.co/120x120/1a1a2e/00ffff?text=GOKU';
+                    this.style.borderRadius = '50%';
+                    this.style.border = '2px solid cyan';
+                };
+
+                gif.style.left = (startX + GIF_OFFSET_X) + 'px';
+                gif.style.top = (startY + GIF_OFFSET_Y) + 'px';
+                gif.style.transform = `translate(-50%, -50%) ${isP1 ? '' : 'scaleX(-1)'}`;
+                document.body.appendChild(gif);
+
+                let energyBall = null;
+                if (!isRealAudioWorking) {
+                    energyBall = document.createElement('div');
+                    energyBall.className = 'kamehameha-ball';
+                    
+                    energyBall.style.left = (startX + GIF_OFFSET_X) + 'px';
+                    energyBall.style.top = (startY + GIF_OFFSET_Y) + 'px';
+                    const ballOffsetX = isP1 ? 60 : -60; 
+                    energyBall.style.transform = `translate(calc(-50% + ${ballOffsetX}px), -50%)`;
+                    document.body.appendChild(energyBall);
+
+                    energyBall.animate([
+                        { width: '0px', height: '0px', opacity: 0 },
+                        { width: '20px', height: '20px', opacity: 1, offset: 0.2 },
+                        { width: '60px', height: '60px', opacity: 1 } 
+                    ], { duration: CHARGE_TIME, fill: 'forwards' });
+                }
+
+                setTimeout(() => {
+                    if (!isRealAudioWorking) playSound('kame_blast'); 
+                    
+                    triggerStatusEffect(attackerAvatar, attackerPrefix, '', 0, true);
+
+                    const beam = document.createElement('div');
+                    beam.className = 'kamehameha-beam';
+                    
+                    beam.style.height = LASER_HEIGHT + 'px';
+                    beam.style.left = (startX + LASER_OFFSET_X) + 'px';
+                    
+                    beam.style.top = (startY + GIF_OFFSET_Y + LASER_OFFSET_Y - (LASER_HEIGHT / 2)) + 'px'; 
+                    beam.style.width = (distance - Math.abs(LASER_OFFSET_X)) + 'px';
+                    beam.style.transform = `rotate(${angle}deg)`;
+                    document.body.appendChild(beam);
+
+                    const beamAnim = beam.animate([
+                        { transform: `rotate(${angle}deg) scaleX(0)`, opacity: 1 },
+                        { transform: `rotate(${angle}deg) scaleX(1)`, opacity: 1, offset: 0.05 }, 
+                        { transform: `rotate(${angle}deg) scaleX(1)`, opacity: 1, offset: 0.8 }, 
+                        { transform: `rotate(${angle}deg) scaleX(1)`, opacity: 0 } 
+                    ], { duration: BEAM_DURATION, easing: 'ease-out' });
+
+                    setTimeout(() => {
+                        triggerStatusEffect(targetAvatar, targetPrefix, 'burn', 3000, true);
+                        targetAvatar.animate([
+                            { transform: 'translate(-10px, 0)' }, { transform: 'translate(10px, 0)' }
+                        ], { duration: 50, iterations: 20 });
+                        
+                        // --- THÊM TAKE DAMAGE Ở ĐÂY ---
+                        let dmg = parseFloat(document.querySelector('[data-save="skill_10_dmg"]')?.value) || 120;
+                        window.takeDamage(targetPrefix, dmg);
+                    }, 50);
+
+                    setTimeout(() => {
+                        if (gif && document.body.contains(gif)) {
+                            gif.animate([{opacity: 1}, {opacity: 0}], {duration: 300}).onfinish = () => gif.remove();
+                        }
+                    }, GIF_STAY_TIME);
+
+                    beamAnim.onfinish = () => { 
+                        beam.remove(); 
+                        if(energyBall) energyBall.remove(); 
+                    };
+                }, CHARGE_TIME); 
+            }
+
+            // =========================================================================
+            // TABS & DATA GRID & MODAL LOGIC
+            // =========================================================================
+            const gridContainer = document.getElementById('debug-grid');
+            for(let r = 1; r <= 9; r++) {
+                for(let c = 0; c < 16; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "border border-green-400/50 flex items-start justify-start p-1 text-green-400 font-mono text-xs";
+                    cell.innerText = String.fromCharCode(65 + c) + r;
+                    gridContainer.appendChild(cell);
+                }
+            }
+            document.getElementById('toggle-grid-btn').addEventListener('click', () => {
+                gridContainer.classList.toggle('hidden');
+            });
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => { 
+                        b.classList.remove('active', 'border-b-4', 'border-orange-500', 'text-orange-600', 'bg-edNavy', 'text-white'); 
+                        b.classList.add('bg-e5e7eb', 'text-374151'); 
+                    });
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    btn.classList.remove('bg-e5e7eb', 'text-374151'); 
+                    if(btn.dataset.target === 'tab-controls') {
+                        btn.classList.add('active', 'border-b-4', 'border-orange-500', 'text-orange-600'); 
+                    } else {
+                        btn.classList.add('active', 'bg-edNavy', 'text-white');
+                    }
+                    document.getElementById(btn.dataset.target).classList.add('active');
+                });
+            });
+
+            const modal = document.getElementById('settings-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            document.getElementById('open-settings-btn').addEventListener('click', () => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            });
+            
+            document.getElementById('close-settings-btn').addEventListener('click', () => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalContent.classList.add('scale-95');
+                modalContent.classList.remove('scale-100');
+            });
+
+            const keybindInputs = document.querySelectorAll('.keybind-input');
+            let activeKeybindInput = null;
+
+            keybindInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    activeKeybindInput = this;
+                    this.value = '...';
+                });
+                input.addEventListener('blur', function() {
+                    if (this.value === '...') {
+                        this.value = this.dataset.oldValue || 'A'; 
+                    }
+                    activeKeybindInput = null;
+                });
+                input.dataset.oldValue = input.value;
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (activeKeybindInput) {
+                    e.preventDefault(); 
+                    let key = e.key;
+                    
+                    if (e.code.startsWith('Numpad') && key >= '0' && key <= '9') {
+                        key = 'NUM' + key;
+                    } else if (e.code === 'NumpadEnter') {
+                        key = 'NUM ENTER';
+                    }
+                    
+                    if(key === ' ') key = 'SPACE';
+                    else if(key === 'Enter') key = 'ENTER';
+                    else if(key.length === 1) key = key.toUpperCase();
+                    else if(key.startsWith('Arrow')) key = key.replace('Arrow', 'A-');
+
+                    activeKeybindInput.value = key;
+                    activeKeybindInput.dataset.oldValue = key;
+                    activeKeybindInput.blur(); 
+                    activeKeybindInput.dispatchEvent(new Event('change'));
+                }
+            });
+
+            const tbody = document.getElementById('grid-body');
+            let currentRowCount = 0;
+            const colATypeSelect = document.getElementById('col-a-type');
+            const colBTypeSelect = document.getElementById('col-b-type');
+            const colALbl = document.getElementById('col-a-lbl');
+            const colBLbl = document.getElementById('col-b-lbl');
+
+            function updateGridHeaders() {
+                colALbl.textContent = colATypeSelect.value === 'image' ? '(images/...)' : '(Text)';
+                colBLbl.textContent = colBTypeSelect.value === 'image' ? '(images/...)' : '(Text)';
+                document.querySelectorAll('.excel-input').forEach(inp => {
+                    inp.dispatchEvent(new Event('input'));
+                });
+            }
+
+            colATypeSelect.addEventListener('change', updateGridHeaders);
+            colBTypeSelect.addEventListener('change', updateGridHeaders);
+
+            function attachInputListeners(input) {
+                input.addEventListener('focus', function() { this.parentElement.classList.add('focused'); });
+                input.addEventListener('blur', function() { this.parentElement.classList.remove('focused'); });
+                
+                input.addEventListener('input', function() {
+                    const row = this.dataset.row;
+                    const colName = this.dataset.col; 
+                    const type = colName === 'colA' ? colATypeSelect.value : colBTypeSelect.value;
+                    const previewImg = document.getElementById(`preview-${colName}-${row}`);
+                    const val = this.value.trim();
+
+                    if (type === 'image' && val !== '') {
+                        previewImg.src = `images/${val}.png`;
+                        previewImg.onerror = function() {
+                            if (this.src.includes('.png')) this.src = `images/${val}.jpg`;
+                            else { this.onerror = null; this.src = `https://placehold.co/32x32/f1f5f9/94a3b8?text=X`; }
+                        };
+                        previewImg.classList.remove('hidden');
+                        this.style.paddingRight = '40px'; 
+                    } else {
+                        previewImg.classList.add('hidden');
+                        previewImg.src = '';
+                        this.style.paddingRight = '8px';
+                    }
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if(activeKeybindInput) return; 
+                    const row = parseInt(this.dataset.row); 
+                    const col = this.dataset.col; 
+                    let nextRow = row; let nextInput = null;
+                    if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); nextRow = row < currentRowCount ? row + 1 : row; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
+                    else if (e.key === 'ArrowUp') { e.preventDefault(); nextRow = row > 1 ? row - 1 : 1; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
+                    else if (e.key === 'ArrowRight' && this.selectionStart === this.value.length) { if(col === 'colA') nextInput = document.querySelector(`.excel-input[data-row="${row}"][data-col="colB"]`); if(nextInput) e.preventDefault(); }
+                    else if (e.key === 'ArrowLeft' && this.selectionStart === 0) { if(col === 'colB') nextInput = document.querySelector(`.excel-input[data-row="${row}"][data-col="colA"]`); if(nextInput) e.preventDefault(); }
+                    if (nextInput) nextInput.focus();
+                });
+            }
+
+            function createGridRow(i) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="row-num">${i}</td>
+                    <td class="excel-cell">
+                        <div class="flex items-center w-full h-full relative">
+                            <input type="text" class="excel-input text-left" data-col="colA" data-row="${i}">
+                            <img src="" class="img-preview hidden" id="preview-colA-${i}">
+                        </div>
+                    </td>
+                    <td class="excel-cell">
+                        <div class="flex items-center w-full h-full relative">
+                            <input type="text" class="excel-input text-left" data-col="colB" data-row="${i}">
+                            <img src="" class="img-preview hidden" id="preview-colB-${i}">
+                        </div>
+                    </td>
+                    <td class="excel-cell flex items-center justify-center"><input type="checkbox" class="custom-checkbox" data-col="active" data-row="${i}" checked></td>
+                `;
+                tbody.appendChild(tr);
+                tr.querySelectorAll('.excel-input').forEach(attachInputListeners);
+                currentRowCount = i;
+            }
+
+            for (let i = 1; i <= 5; i++) { createGridRow(i); }
+            updateGridHeaders();
+
+            document.getElementById('btn-auto-fill').addEventListener('click', () => {
+                const targetCol = document.getElementById('autofill-target').value;
+                const start = parseInt(document.getElementById('autofill-start').value);
+                const end = parseInt(document.getElementById('autofill-end').value);
+                
+                if(isNaN(start) || isNaN(end) || start > end) { alert("Khoảng số không hợp lệ!"); return; }
+                const count = end - start + 1;
+                while (currentRowCount < count) { createGridRow(currentRowCount + 1); }
+                let currentNum = start;
+                for(let r = 1; r <= count; r++) {
+                    const checkbox = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`);
+                    if(targetCol === 'colC') {
+                        if(checkbox) checkbox.checked = true;
+                    } else {
+                        const input = document.querySelector(`.excel-input[data-col="${targetCol}"][data-row="${r}"]`);
+                        if(input) { input.value = currentNum; input.dispatchEvent(new Event('input')); currentNum++; }
+                        if(checkbox) checkbox.checked = true;
+                    }
+                }
+            });
+
+            document.getElementById('btn-clear-data').addEventListener('click', () => {
+                if(confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu hiện tại?')) {
+                    document.querySelectorAll('.excel-input').forEach(inp => { inp.value = ''; inp.dispatchEvent(new Event('input')); });
+                    document.querySelectorAll('.custom-checkbox').forEach(cb => cb.checked = false);
+                    localStorage.removeItem('pvp_game_data');
+                }
+            });
+
+            document.getElementById('data-grid').addEventListener('paste', function(e) {
+                e.preventDefault(); 
+                const pastedData = (e.clipboardData || window.clipboardData).getData('Text'); if (!pastedData) return;
+                const activeElement = document.activeElement; if (!activeElement.classList.contains('excel-input')) return;
+                const startRow = parseInt(activeElement.dataset.row); 
+                const columns = ['colA', 'colB']; 
+                let startColIndex = columns.indexOf(activeElement.dataset.col);
+                const rows = pastedData.split(/\r?\n/); 
+                const neededRows = startRow + rows.length - 1;
+                while(currentRowCount < neededRows) { createGridRow(currentRowCount + 1); }
+                let cRow = startRow;
+                rows.forEach(row => {
+                    if (row.trim() === '') return;
+                    const cells = row.split('\t'); let currentColIndex = startColIndex;
+                    cells.forEach(cellText => {
+                        if (currentColIndex < columns.length) {
+                            const targetInput = document.querySelector(`.excel-input[data-col="${columns[currentColIndex]}"][data-row="${cRow}"]`);
+                            if (targetInput) { targetInput.value = cellText; targetInput.dispatchEvent(new Event('input')); }
+                        }
+                        currentColIndex++;
+                    });
+                    cRow++;
+                });
+            });
+
+            function getAvatarHtml(val) {
+                if(!val) return "";
+                const isUrl = val.startsWith('http') || val.startsWith('data:');
+                const tenorMatch = val.match(/tenor\.com\/view\/.*-(\d+)$/);
+                if (tenorMatch) { return `<iframe src="https://tenor.com/embed/${tenorMatch[1]}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`; } 
+                else if (isUrl) { return `<img src="${val}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null; this.src='https://placehold.co/200x200/1e293b/cbd5e1?text=ERROR';" />`; } 
+                else { return `<img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='https://placehold.co/200x200/1E3A8A/F6C90E?text=IMG+${val}';}" class="w-full h-full object-cover pointer-events-none bg-black" />`; }
+            }
+
+            function safeSetText(elementId, textValue) {
+                const el = document.getElementById(elementId);
+                if (el && textValue) el.innerText = textValue;
+            }
+
+            const svgTick = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(34,197,94,0.8)]"><svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div>`;
+            const svgCross = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(239,68,68,0.8)]"><svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></div>`;
+
+            document.getElementById('save-and-close-btn').addEventListener('click', function() {
+                this.blur(); 
+                const savedKeys = {};
+                document.querySelectorAll('.keybind-input').forEach(inp => { savedKeys[inp.dataset.save] = inp.value; });
+                
+                safeSetText('ui-key-p1-a1', savedKeys.key_p1_a1); safeSetText('ui-ans-p1-1', savedKeys.key_p1_a1);
+                safeSetText('ui-key-p1-a2', savedKeys.key_p1_a2); safeSetText('ui-ans-p1-2', savedKeys.key_p1_a2);
+                safeSetText('ui-key-p1-a3', savedKeys.key_p1_a3); safeSetText('ui-ans-p1-3', savedKeys.key_p1_a3);
+                safeSetText('ui-key-p1-a4', savedKeys.key_p1_a4); safeSetText('ui-ans-p1-4', savedKeys.key_p1_a4);
+                
+                safeSetText('ui-key-p1-s1', savedKeys.key_p1_s1); safeSetText('ui-key-p1-s2', savedKeys.key_p1_s2);
+                safeSetText('ui-key-p1-s3', savedKeys.key_p1_s3); safeSetText('ui-key-p1-ult', savedKeys.key_p1_ult);
+
+                safeSetText('ui-key-p2-a1', savedKeys.key_p2_a1); safeSetText('ui-ans-p2-1', savedKeys.key_p2_a1);
+                safeSetText('ui-key-p2-a2', savedKeys.key_p2_a2); safeSetText('ui-ans-p2-2', savedKeys.key_p2_a2);
+                safeSetText('ui-key-p2-a3', savedKeys.key_p2_a3); safeSetText('ui-ans-p2-3', savedKeys.key_p2_a3);
+                safeSetText('ui-key-p2-a4', savedKeys.key_p2_a4); safeSetText('ui-ans-p2-4', savedKeys.key_p2_a4);
+                
+                safeSetText('ui-key-p2-s1', savedKeys.key_p2_s1); safeSetText('ui-key-p2-s2', savedKeys.key_p2_s2);
+                safeSetText('ui-key-p2-s3', savedKeys.key_p2_s3); safeSetText('ui-key-p2-ult', savedKeys.key_p2_ult);
+
+                const p1Av = document.getElementById('p1-avatar-input').value;
+                const p2Av = document.getElementById('p2-avatar-input').value;
+                if(p1Av) { let avHtml = getAvatarHtml(p1Av); document.getElementById('p1-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p1-avatar').innerHTML = avHtml; }
+                if(p2Av) { let avHtml = getAvatarHtml(p2Av); document.getElementById('p2-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p2-avatar').innerHTML = avHtml; }
+
+                let gridData = [];
+                for (let r = 1; r <= currentRowCount; r++) {
+                    let colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value;
+                    let colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value;
+                    let active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
+                    if (colA && colB && active) { gridData.push({ cotA: colA, cotB: colB, active: active }); }
+                }
+                
+                saveSettings(gridData);
+                
+                if (typeof window.GameplayManager !== 'undefined') { window.GameplayManager.initGame(null, gridData); }
+
+                document.getElementById('close-settings-btn').click();
+                document.getElementById('vs-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('btn-play-again').addEventListener('click', function() {
+                document.getElementById('endgame-modal').classList.add('hidden');
+                
+                // Tắt nhạc Win và các nhạc nền khác để đảm bảo im lặng trước trận mới
+                winAudio.pause();
+                winAudio.currentTime = 0;
+                mainThemeAudio.pause();
+                mainThemeAudio.currentTime = 0;
+                suddenDeathAudio.pause();
+                suddenDeathAudio.currentTime = 0;
+                
+                // Reset hiệu ứng chết/thắng của Avatar để vào trận mới
+                ['p1', 'p2'].forEach(p => {
+                     const box = document.getElementById(`${p}-avatar-box`);
+                     box.style.transition = 'none'; 
+                     box.style.filter = ''; 
+                     box.style.transform = ''; 
+                     box.style.opacity = '1'; 
+                     box.style.zIndex = '10';
+                     box.style.boxShadow = '';
+                     box.style.borderRadius = ''; // Xóa border-radius set thủ công
+                     if(box.effectIntervalId) clearInterval(box.effectIntervalId);
+
+                     if(window.GameplayManager && window.GameplayManager.state[p]) {
+                         window.GameplayManager.state[p].hp = window.GameplayManager.state[p].maxHp;
+                         window.GameplayManager.state[p].shield = 0;
+                     }
+                });
+                
+                if (window.GameplayManager) {
+                    window.GameplayManager.updateUI();
+                    // Reset đồng hồ và câu hỏi
+                    window.GameplayManager.state.questionsPassed = 0;
+                    window.GameplayManager.state.isSuddenDeath = false; // Đặt lại cờ SD
+                    document.getElementById('quiz-timer').classList.remove('text-red-500', 'animate-pulse');
+                    if (window.GameplayManager.suddenDeathTimer) clearInterval(window.GameplayManager.suddenDeathTimer);
+                }
+                document.getElementById('vs-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('btn-start-battle').addEventListener('click', function() {
+                // Phát âm thanh Welcome
+                welcomeAudio.currentTime = 0;
+                welcomeAudio.play().catch(e => console.log("Cần tương tác để phát âm thanh"));
+
+                // ======================================================
+                // ⚙️ THÔNG SỐ ĐIỀU CHỈNH: THỜI GIAN TRỄ BẬT NHẠC MAIN THEME
+                // Đổi số 2000 thành thời gian bạn muốn (ví dụ: 3000 = 3 giây)
+                // ======================================================
+                const MAIN_THEME_DELAY_MS = 2000;
+
+                // Chờ X giây sau mới bật nhạc nền chính Main Theme
+                setTimeout(() => {
+                    if (window.GameplayManager && window.GameplayManager.state.isPlaying && !window.GameplayManager.state.isSuddenDeath) {
+                        mainThemeAudio.currentTime = 0;
+                        mainThemeAudio.play().catch(e => console.log(e));
+                    }
+                }, MAIN_THEME_DELAY_MS);
+
+                window.GameplayManager.state.p1.name = document.getElementById('p1-name-input').value || 'HERO';
+                window.GameplayManager.state.p2.name = document.getElementById('p2-name-input').value || 'BOSS';
+                
+                document.getElementById('p1-name-input').dispatchEvent(new Event('change'));
+                document.getElementById('p2-name-input').dispatchEvent(new Event('change'));
+
+                document.getElementById('vs-modal').classList.add('hidden');
+                window.GameplayManager.startGame(); 
+            });
+
+            loadSettings();
+
+            // =========================================================================
+            // --- [MODULE: GAMEPLAY_MANAGER_CORE] ---
+            // =========================================================================
+            const GameplayManager = {
+                state: {
+                    isPlaying: false,
+                    isTransitioning: false,
+                    mode: 'sequential',
+                    stunTime: 2000,
+                    dataPool: [],
+                    activePool: [],
+                    wrongPool: [], 
+                    isRetryPhase: false, 
+                    currentQuestionFails: 0, 
+                    currentQuiz: null,
+                    totalQuestions: 0,
+                    questionsPassed: 0,
+                    matchStartTime: 0,
+                    isSuddenDeath: false,
+                    p1: { name: 'HERO', hp: 100, maxHp: 100, mana: 0, shield: 0, isStunned: false, isFrozen: false, deck: [], queue: [] },
+                    p2: { name: 'BOSS', hp: 1000, maxHp: 1000, mana: 0, shield: 0, isStunned: false, isFrozen: false, deck: [], queue: [] }
+                },
+                suddenDeathTimer: null,
+                SKILL_POOL: [
+                    { id: 'meteor', icon: '☄️' },
+                    { id: 'kamehameha', icon: '🌊' }
+                ],
+
+                initGame: function(settingsData, gridData) {
+                    if(gridData.length < 4) { alert("Please enter and tick at least 4 valid rows of data to have 4 options!"); return; }
+                    this.state.dataPool = gridData;
+                    this.state.totalQuestions = gridData.length;
+                    this.state.questionsPassed = 1;
+                    
+                    this.state.mode = document.getElementById('setting_quiz_mode')?.value || 'sequential';
+                    this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || 2) * 1000;
+                    
+                    this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || 100;
+                    this.state.p2.maxHp = this.state.p2.hp = parseInt(document.getElementById('boss-max-hp')?.value) || 1000;
+                    this.state.p1.mana = 0; this.state.p2.mana = 0;
+                    this.state.p1.isStunned = false; this.state.p2.isStunned = false;
+                    this.state.p1.isFrozen = false; this.state.p2.isFrozen = false;
+                    this.state.p1.queue = []; this.state.p2.queue = [];
+                    
+                    this.state.wrongPool = [];
+                    this.state.isRetryPhase = false;
+                    this.state.isTransitioning = false;
+
+                    this.buildDecks();
+                    this.refreshActivePool();
+                    this.updateUI();
+                    
+                    document.getElementById('quiz-counter').innerText = `1/${this.state.totalQuestions}`;
+                    renderHallOfFame(); // Hiển thị lịch sử ngay khi load
+                },
+
+                buildDecks: function() {
+                    // Logic xào bài vào Giỏ (Deck)
+                    this.state.p1.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                    this.state.p2.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                },
+
+                drawSkill: function(playerPrefix) {
+                    let player = this.state[playerPrefix];
+                    // Nếu rút hết bài thì nạp lại và xáo lên
+                    if (player.deck.length === 0) {
+                        player.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                    }
+                    return player.deck.shift();
+                },
+
+                startGame: function() {
+                    this.state.isPlaying = true;
+                    this.state.matchStartTime = Date.now();
+                    this.startSuddenDeathTimer();
+                    this.loadNextQuestion();
+                },
+                
+                startSuddenDeathTimer: function() {
+                    if (this.suddenDeathTimer) clearInterval(this.suddenDeathTimer);
+                    
+                    let limitMinutes = parseFloat(document.getElementById('sudden-death-time')?.value) || 3;
+                    let limitSec = limitMinutes * 60;
+                    let sdDmg = parseFloat(document.getElementById('sudden-death-dmg')?.value) || 5;
+                    let timerEl = document.getElementById('quiz-timer');
+                    
+                    this.suddenDeathTimer = setInterval(() => {
+                        if (!this.state.isPlaying) {
+                            clearInterval(this.suddenDeathTimer);
+                            return;
+                        }
+                        
+                        let elapsedSec = Math.floor((Date.now() - this.state.matchStartTime) / 1000);
+                        let remaining = Math.max(0, limitSec - elapsedSec);
+                        
+                        let mins = Math.floor(remaining / 60).toString().padStart(2, '0');
+                        let secs = (remaining % 60).toString().padStart(2, '0');
+                        timerEl.innerText = `${mins}:${secs}`;
+
+                        // Hết giờ: Kích hoạt Sudden Death
+                        if (remaining <= 0) {
+                            // Chuyển nhạc nếu chưa chuyển
+                            if (!this.state.isSuddenDeath) {
+                                this.state.isSuddenDeath = true;
+                                mainThemeAudio.pause();
+                                mainThemeAudio.currentTime = 0; // Đảm bảo ngưng hẳn Main Theme
+                                suddenDeathAudio.currentTime = 0;
+                                suddenDeathAudio.play().catch(e => console.log("Cần tương tác audio"));
+
+                                // ==========================================
+                                // HIỆU ỨNG SUDDEN DEATH: MA QUỶ BAY LÊN
+                                // ==========================================
+                                for (let i = 0; i < 20; i++) {
+                                    setTimeout(() => {
+                                        let entity = document.createElement('div');
+                                        entity.innerText = Math.random() > 0.4 ? '👻' : (Math.random() > 0.5 ? '💀' : '☠️');
+                                        entity.style.position = 'fixed';
+                                        entity.style.left = (Math.random() * 100) + 'vw';
+                                        entity.style.top = '110vh'; // Bắt đầu từ dưới đáy màn hình
+                                        entity.style.fontSize = (50 + Math.random() * 80) + 'px'; 
+                                        entity.style.zIndex = '9999';
+                                        entity.style.pointerEvents = 'none';
+                                        entity.style.filter = 'drop-shadow(0 0 15px red)';
+                                        document.body.appendChild(entity);
+
+                                        let duration = 2000 + Math.random() * 2000;
+                                        
+                                        entity.animate([
+                                            { transform: 'translate(-50%, 0) rotate(0deg) scale(0.5)', opacity: 0 },
+                                            { transform: `translate(-50%, -30vh) rotate(${(Math.random() - 0.5) * 45}deg) scale(1)`, opacity: 0.9, offset: 0.2 },
+                                            { transform: `translate(-50%, -120vh) rotate(${(Math.random() - 0.5) * 90}deg) scale(1.5)`, opacity: 0 }
+                                        ], { duration: duration, easing: 'ease-in-out' }).onfinish = () => entity.remove();
+                                    }, i * 150); // Xuất hiện lần lượt
+                                }
+                            }
+
+                            timerEl.classList.add('text-red-500', 'animate-pulse');
+                            
+                            // Trừ thẳng máu (Sudden Death) bằng hàm takeDamage để kích hoạt hiệu ứng văng máu
+                            window.takeDamage('p1', sdDmg);
+                            window.takeDamage('p2', sdDmg);
+                            
+                            // Rung nhẹ màn hình cảnh báo
+                            document.body.style.transform = `translate(${(Math.random()-0.5)*4}px, ${(Math.random()-0.5)*4}px)`;
+                            setTimeout(()=> document.body.style.transform = '', 100);
+                        }
+                    }, 1000);
+                },
+
+                refreshActivePool: function() {
+                    this.state.activePool = [...this.state.dataPool];
+                    if (this.state.mode === 'random') { this.state.activePool.sort(() => Math.random() - 0.5); }
+                    this.state.wrongPool = [];
+                    this.state.isRetryPhase = false;
+                },
+
+                loadNextQuestion: function() {
+                    if (this.state.activePool.length === 0) {
+                        if (this.state.wrongPool.length > 0 && !this.state.isRetryPhase) {
+                            this.state.activePool = [...this.state.wrongPool];
+                            if (this.state.mode === 'random') { this.state.activePool.sort(() => Math.random() - 0.5); }
+                            this.state.wrongPool = [];
+                            this.state.isRetryPhase = true; 
+                        } else {
+                            this.refreshActivePool();
+                        }
+                    }
+                    
+                    // Cập nhật Q Counter
+                    if (this.state.questionsPassed > this.state.totalQuestions && this.state.totalQuestions > 0) {
+                        // Tính chu kỳ lặp lại
+                         let displayNum = ((this.state.questionsPassed - 1) % this.state.totalQuestions) + 1;
+                         document.getElementById('quiz-counter').innerText = `${displayNum}/${this.state.totalQuestions}`;
+                    } else {
+                         document.getElementById('quiz-counter').innerText = `${this.state.questionsPassed}/${this.state.totalQuestions}`;
+                    }
+
+                    this.state.currentQuestionFails = 0;
+                    let quizItem = this.state.activePool.shift(); 
+                    let correctAnswer = quizItem.cotB;
+                    
+                    let otherOptions = this.state.dataPool.map(item => item.cotB).filter(val => val !== correctAnswer);
+                    let uniqueDistractors = [...new Set(otherOptions)]; 
+                    uniqueDistractors.sort(() => Math.random() - 0.5);
+                    
+                    let selectedDistractors = [];
+                    if (uniqueDistractors.length === 0) {
+                         selectedDistractors = ["A", "B", "C"]; 
+                    } else {
+                        for(let i=0; i<3; i++) { 
+                            selectedDistractors.push(uniqueDistractors[i % uniqueDistractors.length]); 
+                        }
+                    }
+
+                    let finalAnswers = [correctAnswer, ...selectedDistractors];
+                    finalAnswers.sort(() => Math.random() - 0.5);
+
+                    this.state.currentQuiz = {
+                        originalItem: quizItem, 
+                        questionImageOrText: quizItem.cotA,
+                        correctAnswer: correctAnswer,
+                        options: finalAnswers,
+                        correctIndex: finalAnswers.indexOf(correctAnswer)
+                    };
+
+                    let ansContainer = document.getElementById('answers-container');
+                    let quizQ = document.getElementById('question-container');
+                    
+                    ansContainer.classList.add('opacity-0', 'scale-90');
+                    quizQ.classList.add('opacity-0', 'scale-90');
+                    
+                    for(let i=1; i<=4; i++){
+                        document.getElementById(`overlay-ans-${i}`).classList.add('hidden');
+                        document.getElementById(`icon-ans-${i}`).classList.replace('scale-100', 'scale-0');
+                    }
+
+                    setTimeout(() => {
+                        this.renderQuizUI();
+                        ansContainer.classList.remove('opacity-0', 'scale-90');
+                        quizQ.classList.remove('opacity-0', 'scale-90');
+                        this.state.isTransitioning = false; 
+                    }, 300); 
+                },
+
+                renderQuizUI: function() {
+                    let qState = this.state.currentQuiz;
+                    let qImg = document.getElementById('quiz-q-img');
+                    let qTxt = document.getElementById('quiz-q-txt');
+                    let colAType = document.getElementById('col-a-type').value;
+                    let colBType = document.getElementById('col-b-type').value;
+                    
+                    if (colAType === 'image') {
+                        let imgSource = qState.questionImageOrText;
+                        if (!imgSource.startsWith('http') && !imgSource.startsWith('data:')) { imgSource = `images/${imgSource}.png`; }
+                        qImg.src = imgSource;
+                        qImg.onerror = function() {
+                            if (this.src.includes('.png')) this.src = this.src.replace('.png', '.jpg');
+                            else { this.onerror = null; this.src = `https://placehold.co/800x400/e2e8f0/475569?text=ERROR`; }
+                        };
+                        qImg.classList.remove('hidden'); qTxt.classList.add('hidden');
+                    } else {
+                        qTxt.innerText = qState.questionImageOrText;
+                        qTxt.classList.remove('hidden'); qImg.classList.add('hidden');
+                    }
+
+                    let answerButtons = document.querySelectorAll('#answers-container > div');
+                    answerButtons.forEach((btn, index) => {
+                        let spanTxt = btn.querySelector('span.text-3xl');
+                        if (spanTxt && qState.options[index]) {
+                            if (colBType === 'image') {
+                                let ansImgSource = qState.options[index];
+                                if (!ansImgSource.startsWith('http') && !ansImgSource.startsWith('data:')) { ansImgSource = `images/${ansImgSource}.png`; }
+                                spanTxt.innerHTML = `<img src="${ansImgSource}" class="w-full h-full max-h-24 object-contain drop-shadow-md" onerror="if(this.src.includes('.png'))this.src=this.src.replace('.png','.jpg');else this.style.display='none';">`;
+                            } else { spanTxt.innerText = qState.options[index]; }
+                        }
+                    });
+                },
+
+                addMana: function(playerPrefix, amount) {
+                    let player = this.state[playerPrefix];
+                    let oldCapacity = Math.floor(player.mana / 5);
+                    player.mana = Math.min(10, player.mana + amount);
+                    let newCapacity = Math.floor(player.mana / 5);
+
+                    if (newCapacity > oldCapacity) {
+                        let skillsToDraw = newCapacity - oldCapacity;
+                        for(let i=0; i<skillsToDraw; i++) {
+                            if (player.queue.length < 2) {
+                                let drawnSkill = this.drawSkill(playerPrefix);
+                                player.queue.push(drawnSkill);
+                                playSound('draw_skill');
+                            }
+                        }
+                    }
+                    this.updateUI();
+                },
+
+                handlePlayerAnswer: function(playerPrefix, selectedAnswerIndex) {
+                    if (!this.state.isPlaying || this.state.isTransitioning) return;
+                    let player = this.state[playerPrefix];
+                    let opponentPrefix = playerPrefix === 'p1' ? 'p2' : 'p1';
+                    let opponent = this.state[opponentPrefix];
+
+                    if (player.isStunned || player.isFrozen) return;
+
+                    let isCorrect = (selectedAnswerIndex === this.state.currentQuiz.correctIndex);
+                    
+                    let ansIndexPlus1 = selectedAnswerIndex + 1;
+                    let overlay = document.getElementById(`overlay-ans-${ansIndexPlus1}`);
+                    let icon = document.getElementById(`icon-ans-${ansIndexPlus1}`);
+                    overlay.classList.remove('hidden');
+
+                    if (isCorrect) {
+                        this.state.isTransitioning = true;
+                        
+                        icon.innerHTML = svgTick;
+                        icon.classList.replace('scale-0', 'scale-100');
+                        
+                        playSound('correct');
+                        this.addMana(playerPrefix, 1);
+                        this.state.questionsPassed++; // Tăng câu hỏi khi đúng
+                        
+                        setTimeout(() => {
+                            this.loadNextQuestion();
+                        }, 1200);
+                        
+                    } else {
+                        icon.innerHTML = svgCross;
+                        icon.classList.replace('scale-0', 'scale-100');
+
+                        playSound('wrong');
+
+                        let oldCapacity = Math.floor(player.mana / 5);
+                        player.mana = Math.max(0, player.mana - 1);
+                        let newCapacity = Math.floor(player.mana / 5);
+                        
+                        if (newCapacity < oldCapacity && player.queue.length > newCapacity) {
+                            player.queue.pop();
+                        }
+
+                        player.isStunned = true;
+                        let actionBox = document.getElementById(`actions-${playerPrefix}`);
+                        if(actionBox) actionBox.classList.add('stun-lock');
+                        this.updateUI();
+                        
+                        this.state.currentQuestionFails++;
+
+                        if (this.state.currentQuestionFails >= 2) {
+                            this.state.isTransitioning = true;
+                            if (!this.state.isRetryPhase) {
+                                this.state.wrongPool.push(this.state.currentQuiz.originalItem);
+                            }
+                            
+                            setTimeout(() => { this.loadNextQuestion(); }, 1000);
+                        }
+                        
+                        setTimeout(() => { 
+                            player.isStunned = false; 
+                            if(actionBox) actionBox.classList.remove('stun-lock');
+                            this.updateUI(); 
+                        }, this.state.stunTime);
+                    }
+                },
+
+                handleSkill: function(playerPrefix) {
+                    if (!this.state.isPlaying) return;
+                    let player = this.state[playerPrefix];
+                    let opponentPrefix = playerPrefix === 'p1' ? 'p2' : 'p1';
+
+                    if (player.isFrozen) { playSound('freeze'); return; }
+                    
+                    if (player.queue.length > 0 && player.mana >= 5) {
+                        let skillToUse = player.queue.shift();
+                        player.mana -= 5;
+                        this.updateUI();
+
+                        // ==========================================
+                        // ⚓ [NEO 4]: GỌI TÊN SKILL (KÍCH HOẠT)
+                        // Khi có skill mới, thêm 1 dòng "else if" ở đây:
+                        // ==========================================
+                        if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); } 
+                        else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
+                        // ✂️👇 THÊM ELSE IF CHO SKILL MỚI VÀO ĐÂY 👇✂️
+
+                        // ==========================================
+                    }
+                },
+
+                updateUI: function() {
+                    ['p1', 'p2'].forEach(p => {
+                        let player = this.state[p];
+                        
+                        let shieldTxt = player.shield > 0 ? ` (+${Math.round(player.shield)})` : '';
+                        document.getElementById(`${p}-hp-txt`).innerText = `${Math.round(player.hp)} / ${player.maxHp}${shieldTxt}`;
+                        document.getElementById(`${p}-hp-bar`).style.width = `${(player.hp / player.maxHp) * 100}%`;
+                        
+                        let bubble = document.getElementById(`${p}-shield-bubble`);
+                        if (bubble) {
+                            if (player.shield > 0) {
+                                bubble.classList.add('active');
+                                if(p === 'p1') {
+                                    bubble.style.borderColor = 'rgba(0, 168, 255, 0.8)';
+                                    bubble.style.background = 'rgba(0, 168, 255, 0.2)';
+                                    bubble.style.boxShadow = '0 0 15px rgba(0, 168, 255, 0.5), inset 0 0 15px rgba(0, 168, 255, 0.3)';
+                                } else {
+                                    bubble.style.borderColor = 'rgba(255, 71, 87, 0.8)';
+                                    bubble.style.background = 'rgba(255, 71, 87, 0.2)';
+                                    bubble.style.boxShadow = '0 0 15px rgba(255, 71, 87, 0.5), inset 0 0 15px rgba(255, 71, 87, 0.3)';
+                                }
+                            } else {
+                                bubble.classList.remove('active');
+                            }
+                        }
+
+                        document.getElementById(`${p}-mana-txt`).innerText = `Mana: ${player.mana}/10`;
+                        document.getElementById(`${p}-mana-bar`).style.width = `${(player.mana / 10) * 100}%`;
+
+                        let q1 = document.getElementById(`${p}-queue-1`);
+                        let q2 = document.getElementById(`${p}-queue-2`);
+                        
+                        if (player.queue.length > 1) {
+                            q2.innerHTML = `<span class="drop-shadow-md">${player.queue[1].icon}</span>`;
+                            q2.classList.replace('opacity-40', 'opacity-100');
+                        } else {
+                            q2.innerHTML = '';
+                            q2.classList.replace('opacity-100', 'opacity-40');
+                        }
+
+                        if (player.queue.length > 0) {
+                            q1.innerHTML = `<span class="drop-shadow-lg scale-125">${player.queue[0].icon}</span>`;
+                            q1.classList.add('animate-pulse');
+                            q1.style.filter = p === 'p1' ? 'drop-shadow(0 0 10px cyan)' : 'drop-shadow(0 0 10px orange)';
+                        } else {
+                            q1.innerHTML = `<span class="opacity-20 text-${p === 'p1' ? 'cyan-200' : 'orange-200'}">✨</span>`;
+                            q1.classList.remove('animate-pulse');
+                            q1.style.filter = 'none';
+                        }
+                    });
+                }
+            };
+            window.GameplayManager = GameplayManager;
+
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); }
+
+                let key = e.key;
+                if (e.code.startsWith('Numpad') && key >= '0' && key <= '9') { key = 'NUM' + key; } 
+                else if (e.code === 'NumpadEnter') { key = 'NUM ENTER'; }
+
+                key = key.toUpperCase();
+                if(key === ' ') key = 'SPACE';
+                
+                let p1_keys = [
+                    document.getElementById('ui-ans-p1-1')?.innerText.trim().toUpperCase(),
+                    document.getElementById('ui-ans-p1-2')?.innerText.trim().toUpperCase(),
+                    document.getElementById('ui-ans-p1-3')?.innerText.trim().toUpperCase(),
+                    document.getElementById('ui-ans-p1-4')?.innerText.trim().toUpperCase()
+                ];
+                
+                let p2_keys = [
+                    document.getElementById('ui-ans-p2-1')?.innerText.trim().toUpperCase(),
+                    document.getElementById('ui-ans-p2-2')?.innerText.trim().toUpperCase(),
+                    document.getElementById('ui-ans-p2-3')?.innerText.trim().toUpperCase(),
+                    document.getElementById('ui-ans-p2-4')?.innerText.trim().toUpperCase()
+                ];
+
+                let p1_ult = document.getElementById('ui-key-p1-ult')?.innerText.trim().toUpperCase();
+                let p2_ult = document.getElementById('ui-key-p2-ult')?.innerText.trim().toUpperCase();
+
+                if (key === p1_ult) { window.GameplayManager.handleSkill('p1'); return; }
+                if (key === p2_ult) { window.GameplayManager.handleSkill('p2'); return; }
+
+                let p1_s1 = document.getElementById('ui-key-p1-s1')?.innerText.trim().toUpperCase(); 
+                let p1_s2 = document.getElementById('ui-key-p1-s2')?.innerText.trim().toUpperCase(); 
+                let p1_s3 = document.getElementById('ui-key-p1-s3')?.innerText.trim().toUpperCase(); 
+                
+                let p2_s1 = document.getElementById('ui-key-p2-s1')?.innerText.trim().toUpperCase(); 
+                let p2_s2 = document.getElementById('ui-key-p2-s2')?.innerText.trim().toUpperCase(); 
+                let p2_s3 = document.getElementById('ui-key-p2-s3')?.innerText.trim().toUpperCase(); 
+
+                if (key === p1_s2) { window.triggerClickSkill('p1', 'atk'); return; }
+                if (key === p1_s1) { window.triggerClickSkill('p1', 'def'); return; }
+                if (key === p1_s3) { window.triggerClickSkill('p1', 'heal'); return; }
+
+                if (key === p2_s2) { window.triggerClickSkill('p2', 'atk'); return; }
+                if (key === p2_s1) { window.triggerClickSkill('p2', 'def'); return; }
+                if (key === p2_s3) { window.triggerClickSkill('p2', 'heal'); return; }
+
+                let p1Index = p1_keys.indexOf(key);
+                if (p1Index !== -1) { window.GameplayManager.handlePlayerAnswer('p1', p1Index); return; }
+
+                let p2Index = p2_keys.indexOf(key);
+                if (p2Index !== -1) { window.GameplayManager.handlePlayerAnswer('p2', p2Index); }
+            });
+        });
+    </script>
+</body>
+</html>
