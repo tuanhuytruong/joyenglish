@@ -315,8 +315,8 @@
                         targetElement.style.boxShadow = 'inset 0 0 30px cyan, 0 0 15px cyan';
                         targetElement.classList.add('icy-spikes'); 
                         
-                        if (targetPrefix === 'p1') isP1Frozen = true;
-                        if (targetPrefix === 'p2') isP2Frozen = true;
+                        if (targetPrefix === 'p1') window.GameplayManager.state.p1.isFrozen = true;
+                        if (targetPrefix === 'p2') window.GameplayManager.state.p2.isFrozen = true;
                         
                         let actionBox = document.getElementById(`actions-${targetPrefix}`);
                         if(actionBox) {
@@ -333,8 +333,8 @@
                             targetElement.style.boxShadow = ''; 
                             targetElement.classList.remove('icy-spikes');
                             
-                            if (targetPrefix === 'p1') isP1Frozen = false;
-                            if (targetPrefix === 'p2') isP2Frozen = false;
+                            if (targetPrefix === 'p1') window.GameplayManager.state.p1.isFrozen = false;
+                            if (targetPrefix === 'p2') window.GameplayManager.state.p2.isFrozen = false;
                             
                             if(actionBox) {
                                 actionBox.classList.remove('frozen-ui', 'icy-spikes');

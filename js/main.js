@@ -1,6 +1,6 @@
 import { EXTERNAL_AUDIO_VOLUMES, playSound, realKameAudio, mainThemeAudio, suddenDeathAudio, winAudio, defeatedAudio, welcomeAudio, audioCtx } from './audio.js';
 import { WEAPON_ASSETS, spawnFloatingText, takeDamage, fireConfetti, createDeflectedProjectile, playWeaponBarrage, spawnFloatingIcons, triggerStatusEffect } from './effects.js';
-import { isP1Frozen, isP2Frozen, gameState } from './state.js';
+import { gameState } from './state.js';
 import { saveMatchToHistory, renderHallOfFame, triggerEndGame, updateUI } from './ui.js';
 import { loadSettings, saveSettings } from './settings.js';
 import { triggerClickSkill, applyHealOverTime, playMeteorShower, playKamehamehaAnimation, useBasicSkill, triggerCooldownUI } from './skills.js';
@@ -269,45 +269,48 @@ window.triggerClickSkill = triggerClickSkill;
             const svgCross = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(239,68,68,0.8)]"><svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></div>`;
 
             document.getElementById('save-and-close-btn').addEventListener('click', function() {
-                this.blur(); 
-                const savedKeys = {};
-                document.querySelectorAll('.keybind-input').forEach(inp => { savedKeys[inp.dataset.save] = inp.value; });
-                
-                safeSetText('ui-key-p1-a1', savedKeys.key_p1_a1); safeSetText('ui-ans-p1-1', savedKeys.key_p1_a1);
-                safeSetText('ui-key-p1-a2', savedKeys.key_p1_a2); safeSetText('ui-ans-p1-2', savedKeys.key_p1_a2);
-                safeSetText('ui-key-p1-a3', savedKeys.key_p1_a3); safeSetText('ui-ans-p1-3', savedKeys.key_p1_a3);
-                safeSetText('ui-key-p1-a4', savedKeys.key_p1_a4); safeSetText('ui-ans-p1-4', savedKeys.key_p1_a4);
-                
-                safeSetText('ui-key-p1-s1', savedKeys.key_p1_s1); safeSetText('ui-key-p1-s2', savedKeys.key_p1_s2);
-                safeSetText('ui-key-p1-s3', savedKeys.key_p1_s3); safeSetText('ui-key-p1-ult', savedKeys.key_p1_ult);
+                try {
+                    this.blur(); 
+                    const savedKeys = {};
+                    document.querySelectorAll('.keybind-input').forEach(inp => { savedKeys[inp.dataset.save] = inp.value; });
+                    
+                    safeSetText('ui-key-p1-a1', savedKeys.key_p1_a1); safeSetText('ui-ans-p1-1', savedKeys.key_p1_a1);
+                    safeSetText('ui-key-p1-a2', savedKeys.key_p1_a2); safeSetText('ui-ans-p1-2', savedKeys.key_p1_a2);
+                    safeSetText('ui-key-p1-a3', savedKeys.key_p1_a3); safeSetText('ui-ans-p1-3', savedKeys.key_p1_a3);
+                    safeSetText('ui-key-p1-a4', savedKeys.key_p1_a4); safeSetText('ui-ans-p1-4', savedKeys.key_p1_a4);
+                    
+                    safeSetText('ui-key-p1-s1', savedKeys.key_p1_s1); safeSetText('ui-key-p1-s2', savedKeys.key_p1_s2);
+                    safeSetText('ui-key-p1-s3', savedKeys.key_p1_s3); safeSetText('ui-key-p1-ult', savedKeys.key_p1_ult);
 
-                safeSetText('ui-key-p2-a1', savedKeys.key_p2_a1); safeSetText('ui-ans-p2-1', savedKeys.key_p2_a1);
-                safeSetText('ui-key-p2-a2', savedKeys.key_p2_a2); safeSetText('ui-ans-p2-2', savedKeys.key_p2_a2);
-                safeSetText('ui-key-p2-a3', savedKeys.key_p2_a3); safeSetText('ui-ans-p2-3', savedKeys.key_p2_a3);
-                safeSetText('ui-key-p2-a4', savedKeys.key_p2_a4); safeSetText('ui-ans-p2-4', savedKeys.key_p2_a4);
-                
-                safeSetText('ui-key-p2-s1', savedKeys.key_p2_s1); safeSetText('ui-key-p2-s2', savedKeys.key_p2_s2);
-                safeSetText('ui-key-p2-s3', savedKeys.key_p2_s3); safeSetText('ui-key-p2-ult', savedKeys.key_p2_ult);
+                    safeSetText('ui-key-p2-a1', savedKeys.key_p2_a1); safeSetText('ui-ans-p2-1', savedKeys.key_p2_a1);
+                    safeSetText('ui-key-p2-a2', savedKeys.key_p2_a2); safeSetText('ui-ans-p2-2', savedKeys.key_p2_a2);
+                    safeSetText('ui-key-p2-a3', savedKeys.key_p2_a3); safeSetText('ui-ans-p2-3', savedKeys.key_p2_a3);
+                    safeSetText('ui-key-p2-a4', savedKeys.key_p2_a4); safeSetText('ui-ans-p2-4', savedKeys.key_p2_a4);
+                    
+                    safeSetText('ui-key-p2-s1', savedKeys.key_p2_s1); safeSetText('ui-key-p2-s2', savedKeys.key_p2_s2);
+                    safeSetText('ui-key-p2-s3', savedKeys.key_p2_s3); safeSetText('ui-key-p2-ult', savedKeys.key_p2_ult);
 
-                const p1Av = document.getElementById('p1-avatar-input').value;
-                const p2Av = document.getElementById('p2-avatar-input').value;
-                if(p1Av) { let avHtml = getAvatarHtml(p1Av); document.getElementById('p1-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p1-avatar').innerHTML = avHtml; }
-                if(p2Av) { let avHtml = getAvatarHtml(p2Av); document.getElementById('p2-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p2-avatar').innerHTML = avHtml; }
+                    const p1Av = document.getElementById('p1-avatar-input').value;
+                    const p2Av = document.getElementById('p2-avatar-input').value;
+                    if(p1Av) { let avHtml = getAvatarHtml(p1Av); document.getElementById('p1-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p1-avatar').innerHTML = avHtml; }
+                    if(p2Av) { let avHtml = getAvatarHtml(p2Av); document.getElementById('p2-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p2-avatar').innerHTML = avHtml; }
 
-                let gridData = [];
-                for (let r = 1; r <= currentRowCount; r++) {
-                    let colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value;
-                    let colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value;
-                    let active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
-                    if (colA && colB && active) { gridData.push({ cotA: colA, cotB: colB, active: active }); }
+                    let gridData = [];
+                    for (let r = 1; r <= currentRowCount; r++) {
+                        let colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value;
+                        let colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value;
+                        let active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
+                        if (colA && colB && active) { gridData.push({ cotA: colA, cotB: colB, active: active }); }
+                    }
+                    
+                    saveSettings(gridData);
+                    if (typeof window.GameplayManager !== 'undefined') { window.GameplayManager.initGame(null, gridData); }
+
+                    document.getElementById('close-settings-btn').click();
+                    document.getElementById('vs-modal').classList.remove('hidden');
+                } catch(e) {
+                    alert("ERROR in save and close: " + e.message + "\n" + e.stack);
                 }
-                
-                saveSettings(gridData);
-                
-                if (typeof window.GameplayManager !== 'undefined') { window.GameplayManager.initGame(null, gridData); }
-
-                document.getElementById('close-settings-btn').click();
-                document.getElementById('vs-modal').classList.remove('hidden');
             });
 
             document.getElementById('btn-play-again').addEventListener('click', function() {
@@ -379,12 +382,34 @@ window.triggerClickSkill = triggerClickSkill;
                 window.GameplayManager.startGame(); 
             });
 
-            loadSettings();
+
+            const loaded = loadSettings();
+            if (loaded.settings) {
+                document.querySelectorAll('[data-save]').forEach(el => {
+                    if (loaded.settings[el.dataset.save] !== undefined) {
+                        if (el.type === 'checkbox') el.checked = loaded.settings[el.dataset.save];
+                        else el.value = loaded.settings[el.dataset.save];
+                        el.dispatchEvent(new Event('change')); 
+                    }
+                });
+            }
+            if (loaded.gridData && loaded.gridData.length > 0) {
+                const tbody = document.getElementById('grid-body');
+                tbody.innerHTML = ''; 
+                currentRowCount = 0;
+                loaded.gridData.forEach((row, index) => {
+                    createGridRow(index + 1);
+                    document.querySelector(`.excel-input[data-col="colA"][data-row="${index + 1}"]`).value = row.cotA || '';
+                    document.querySelector(`.excel-input[data-col="colB"][data-row="${index + 1}"]`).value = row.cotB || '';
+                    document.querySelector(`.custom-checkbox[data-col="active"][data-row="${index + 1}"]`).checked = row.active;
+                });
+            }
 
             // =========================================================================
             // --- [MODULE: GAMEPLAY_MANAGER_CORE] ---
             // =========================================================================
             const GameplayManager = {
+                state: gameState,
                 suddenDeathTimer: null,
                 SKILL_POOL: [
                     { id: 'meteor', icon: '☄️' },

@@ -18,7 +18,145 @@
         }
     </script>
     
-    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { background-color: #0f172a; margin: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; } 
+        
+        /* 16:9 Aspect Ratio Wrapper */
+        #game-aspect-wrapper {
+            width: 100vw;
+            height: 56.25vw;
+            max-height: 100vh;
+            max-width: 177.77vh;
+            position: relative;
+            background: linear-gradient(to bottom right, #1a0b2e, #2d1b4e, #0f172a);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        #settings-modal { transition: opacity 0.2s ease-in-out; }
+        .excel-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        .excel-table th { background-color: #1E3A8A; color: white; border: 1px solid #cbd5e1; padding: 8px; font-weight: 700; position: sticky; top: 0; z-index: 10; }
+        .excel-table td { border: 1px solid #cbd5e1; padding: 0; position: relative; height: 40px; background: white; }
+        .excel-table td.row-num { background-color: #f1f5f9; text-align: center; color: #64748b; font-weight: bold; width: 50px; }
+        .excel-input { width: 100%; height: 100%; border: none; padding: 8px; outline: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 600; color: #1E3A8A;}
+        .excel-cell.focused { outline: 2px solid #3B82F6; outline-offset: -2px; z-index: 5; }
+        .custom-checkbox { width: 1.2rem; height: 1.2rem; cursor: pointer; }
+        
+        .table-container { max-height: 55vh; overflow-y: auto; overflow-x: auto; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .img-preview { width: 32px; height: 32px; object-fit: contain; background: #e2e8f0; border-radius: 4px; border: 1px solid #cbd5e1; position: absolute; right: 4px; top: 3px; pointer-events: none;}
+        
+        .tab-btn.active { background-color: #1E3A8A !important; color: white !important; }
+        .tab-btn { background-color: #e5e7eb; color: #374151; transition: all 0.2s; }
+        .tab-content { display: none !important; }
+        .tab-content.active { display: block !important; }
+        #tab-data.active { display: flex !important; }
+        
+        .keybind-input { text-align: center; text-transform: uppercase; font-weight: 900; font-size: 1.5rem; cursor: pointer; transition: all 0.2s; }
+        .keybind-input:focus { outline: none; background-color: #FEF08A; box-shadow: 0 0 15px #FACC15; transform: scale(1.05); z-index: 10;}
+
+        @keyframes float-breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.02); } }
+        .animate-boss { animation: float-breathe 4s ease-in-out infinite; }
+        .text-shadow { text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+        /* SKILL CSS & STATUS EFFECTS */
+        .frozen-ui {
+            filter: grayscale(60%) brightness(120%) hue-rotate(180deg) !important;
+            pointer-events: none;
+            position: relative;
+        }
+        
+        /* Hiệu ứng Khóa Stun */
+        .stun-lock {
+            filter: grayscale(100%);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        /* Hiệu ứng băng gai tua tủa */
+        .icy-spikes::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 6px dashed rgba(0, 255, 255, 0.7);
+            border-radius: inherit;
+            box-shadow: inset 0 0 20px rgba(0,255,255,0.5), 0 0 15px rgba(0,255,255,0.8);
+            z-index: 50;
+            pointer-events: none;
+            animation: ice-pulse 1s infinite alternate;
+        }
+        
+        @keyframes ice-pulse {
+            from { opacity: 0.7; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* ✂️ CSS DÀNH RIÊNG CHO KAMEHAMEHA ✂️ */
+        .kamehameha-beam {
+            position: absolute; 
+            height: 54px; 
+            background: linear-gradient(to bottom, rgba(30,144,255,0.9) 0%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 75%, rgba(30,144,255,0.9) 100%);
+            box-shadow: 0 0 15px #1e90ff, 0 0 30px #0000ff, 0 0 50px rgba(0, 0, 255, 0.6);
+            border-radius: 20px;
+            transform-origin: left center;
+            z-index: 9998;
+            pointer-events: none;
+        }
+        
+        .kamehameha-ball {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 40%, #1e90ff 75%, #0000ff 100%);
+            box-shadow: 0 0 20px #1e90ff, 0 0 40px #0000ff;
+            z-index: 9999;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+        .goku-gif {
+            position: absolute;
+            z-index: 10000;
+            pointer-events: none;
+            height: 150px; 
+            width: auto;
+        }
+
+        /* --- BASIC SKILL EFFECTS & UI --- */
+        .shield-bubble {
+            position: absolute;
+            width: 180px; 
+            height: 180px;
+            border-radius: 50%;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(1.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 5px solid rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px rgba(255,255,255,0.5), inset 0 0 15px rgba(255,255,255,0.3);
+            top: 50%;
+            left: 50%;
+            margin-top: -90px;
+            margin-left: -90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .shield-bubble.active { opacity: 1; transform: scale(1); }
+        .shield-number { font-size: 2.5rem; font-weight: 900; color: white; text-shadow: 0 0 8px black, 0 0 15px rgba(0,0,0,0.8), 2px 2px 2px black; z-index: 30; }
+
+        .cd-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); border-radius: 50%; display: none; z-index: 10; pointer-events: none; }
+        .cd-ring { position: absolute; inset: -4px; border-radius: 50%; background: conic-gradient(#f1c40f var(--p, 0%), transparent 0); -webkit-mask: radial-gradient(transparent 50%, black 51%); mask: radial-gradient(transparent 50%, black 51%); display: none; z-index: 10; pointer-events: none; }
+        .cd-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 900; color: white; text-shadow: 0 0 5px black, 0 0 5px black; display: none; z-index: 20; pointer-events: none; }
+        .cd-ready-flash { animation: flashAnim 0.5s ease-out; }
+        
+        @keyframes flashAnim {
+            0% { box-shadow: 0 0 20px 5px #f1c40f; border-color: #fff; transform: scale(1.1); }
+            100% { box-shadow: 0 0 0px 0px transparent; transform: scale(1); }
+        }
+    </style>
 </head>
 
 <body class="font-sans">
@@ -766,6 +904,24 @@
     </div>
 
     <!-- HÀM XỬ LÝ CLICK CHUỘT CHO TOÀN BỘ GAME -->
+    <script>
+        window.triggerClickAnswer = function(playerPrefix, index) {
+            if (window.GameplayManager) {
+                window.GameplayManager.handlePlayerAnswer(playerPrefix, index);
+            }
+        };
+
+        window.triggerClickSkill = function(playerPrefix, skillType) {
+            if (window.GameplayManager) {
+                if(skillType === 'ult') {
+                    window.GameplayManager.handleSkill(playerPrefix);
+                } else {
+                    window.useBasicSkill(playerPrefix, skillType);
+                }
+            }
+        };
+    </script>
+
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

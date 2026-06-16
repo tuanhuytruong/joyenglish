@@ -1,5 +1,5 @@
-            export let isP1Frozen = false;
-            export let isP2Frozen = false;
+            
+            
 
 export const gameState = {
                     isPlaying: false,
@@ -18,4 +18,4 @@ export const gameState = {
                     isSuddenDeath: false,
                     p1: { name: 'HERO', hp: 100, maxHp: 100, mana: 0, shield: 0, isStunned: false, isFrozen: false, deck: [], queue: [] },
                     p2: { name: 'BOSS', hp: 1000, maxHp: 1000, mana: 0, shield: 0, isStunned: false, isFrozen: false, deck: [], queue: [] }
-                },;
+                };
