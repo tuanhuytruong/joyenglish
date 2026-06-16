@@ -304,6 +304,12 @@ window.triggerClickSkill = triggerClickSkill;
                     }
                     
                     saveSettings(gridData);
+                    
+                    if (gridData.length < 4) {
+                        alert("Please enter and tick at least 4 valid rows of data to have 4 options!");
+                        return; // DO NOT CLOSE MODAL
+                    }
+
                     if (typeof window.GameplayManager !== 'undefined') { window.GameplayManager.initGame(null, gridData); }
 
                     document.getElementById('close-settings-btn').click();
@@ -417,7 +423,6 @@ window.triggerClickSkill = triggerClickSkill;
                 ],
 
                 initGame: function(settingsData, gridData) {
-                    if(gridData.length < 4) { alert("Please enter and tick at least 4 valid rows of data to have 4 options!"); return; }
                     this.state.dataPool = gridData;
                     this.state.totalQuestions = gridData.length;
                     this.state.questionsPassed = 1;
