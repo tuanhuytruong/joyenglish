@@ -13,7 +13,6 @@ window.triggerClickSkill = triggerClickSkill;
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
 
             // ========================================================
             // BIẾN TOÀN CỤC
@@ -788,4 +787,3 @@ window.triggerClickSkill = triggerClickSkill;
                 let p2Index = p2_keys.indexOf(key);
                 if (p2Index !== -1) { window.GameplayManager.handlePlayerAnswer('p2', p2Index); }
             });
-        });
