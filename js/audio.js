@@ -1,6 +1,6 @@
-export             // ⚓ [NEO 0]: HỆ THỐNG ÂM THANH & CẤU HÌNH NGOÀI
-            // ========================================================
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// ⚓ [NEO 0]: HỆ THỐNG ÂM THANH & CẤU HÌNH NGOÀI
+// ========================================================
+export const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
             // ✂️ CẤU HÌNH MP3 NGOÀI & VOLUME ✂️
             export const EXTERNAL_AUDIO_VOLUMES = {

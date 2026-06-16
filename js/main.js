@@ -5,7 +5,17 @@ import { saveMatchToHistory, renderHallOfFame, triggerEndGame, updateUI } from '
 import { loadSettings, saveSettings } from './settings.js';
 import { triggerClickSkill, applyHealOverTime, playMeteorShower, playKamehamehaAnimation, useBasicSkill, triggerCooldownUI } from './skills.js';
 
+// Expose functions needed by inline HTML handlers and cross-module window references
 window.triggerClickSkill = triggerClickSkill;
+window.takeDamage = takeDamage;
+window.spawnFloatingText = spawnFloatingText;
+window.fireConfetti = fireConfetti;
+window.createDeflectedProjectile = createDeflectedProjectile;
+window.playWeaponBarrage = playWeaponBarrage;
+window.triggerEndGame = triggerEndGame;
+window.applyHealOverTime = applyHealOverTime;
+window.triggerCooldownUI = triggerCooldownUI;
+window.useBasicSkill = useBasicSkill;
 
         window.triggerClickAnswer = function(playerPrefix, index) {
             if (window.GameplayManager) {
@@ -447,6 +457,10 @@ window.triggerClickSkill = triggerClickSkill;
                     
                     document.getElementById('quiz-counter').innerText = `1/${this.state.totalQuestions}`;
                     renderHallOfFame(); // Hiển thị lịch sử ngay khi load
+                },
+
+                updateUI: function() {
+                    updateUI(this.state);
                 },
 
                 buildDecks: function() {

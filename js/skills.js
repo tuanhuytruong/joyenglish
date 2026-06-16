@@ -1,4 +1,10 @@
-        export function triggerClickSkill(playerPrefix, skillType) {
+import { playSound, realKameAudio } from './audio.js';
+import { spawnFloatingIcons, spawnFloatingText, takeDamage, triggerStatusEffect, playWeaponBarrage } from './effects.js';
+
+let isRealAudioWorking = true;
+realKameAudio.onerror = () => { isRealAudioWorking = false; };
+
+export function triggerClickSkill(playerPrefix, skillType) {
             if (window.GameplayManager) {
                 if(skillType === 'ult') {
                     window.GameplayManager.handleSkill(playerPrefix);

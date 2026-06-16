@@ -1,4 +1,7 @@
-            export function saveMatchToHistory(winnerPrefix, durationStr) {
+import { mainThemeAudio, suddenDeathAudio, winAudio, defeatedAudio } from './audio.js';
+import { spawnFloatingIcons, fireConfetti } from './effects.js';
+
+export function saveMatchToHistory(winnerPrefix, durationStr) {
                 let p1Name = window.GameplayManager.state.p1.name || 'HERO';
                 let p2Name = window.GameplayManager.state.p2.name || 'BOSS';
                 let p1Avatar = document.getElementById('p1-avatar-inner').innerHTML;
@@ -149,14 +152,14 @@
                         let secs = (elapsedTotalSec % 60).toString().padStart(2, '0');
                         saveMatchToHistory(winnerPrefix, `${mins}:${secs}`);
 
-                        window.fireConfetti();
+                        fireConfetti();
                     }, 1000);
                 }, 2000);
-            };
+            }
 
-                export function updateUI() {
+                export function updateUI(state) {
                     ['p1', 'p2'].forEach(p => {
-                        let player = this.state[p];
+                        let player = state[p];
                         
                         let shieldTxt = player.shield > 0 ? ` (+${Math.round(player.shield)})` : '';
                         document.getElementById(`${p}-hp-txt`).innerText = `${Math.round(player.hp)} / ${player.maxHp}${shieldTxt}`;
