@@ -261,13 +261,15 @@ window.useBasicSkill = useBasicSkill;
                 });
             });
 
+            const DEFAULT_AVATAR_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231e3a8a'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%2393c5fd'/%3E%3Cellipse cx='50' cy='85' rx='28' ry='20' fill='%2393c5fd'/%3E%3C/svg%3E`;
+
             function getAvatarHtml(val) {
                 if(!val) return "";
                 const isUrl = val.startsWith('http') || val.startsWith('data:');
                 const tenorMatch = val.match(/tenor\.com\/view\/.*-(\d+)$/);
                 if (tenorMatch) { return `<iframe src="https://tenor.com/embed/${tenorMatch[1]}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`; } 
-                else if (isUrl) { return `<img src="${val}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null; this.src='https://placehold.co/200x200/1e293b/cbd5e1?text=ERROR';" />`; } 
-                else { return `<img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='https://placehold.co/200x200/1E3A8A/F6C90E?text=IMG+${val}';}" class="w-full h-full object-cover pointer-events-none bg-black" />`; }
+                else if (isUrl) { return `<img src="${val}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';" />`; } 
+                else { return `<img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';}" class="w-full h-full object-cover pointer-events-none bg-black" />`; }
             }
 
             function safeSetText(elementId, textValue) {
