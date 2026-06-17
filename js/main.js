@@ -1,4 +1,4 @@
-import { EXTERNAL_AUDIO_VOLUMES, playSound, realKameAudio, mainThemeAudio, suddenDeathAudio, winAudio, defeatedAudio, welcomeAudio, audioCtx } from './audio.js';
+import { EXTERNAL_AUDIO_VOLUMES, playSound, realKameAudio, mainThemeAudio, suddenDeathAudio, winAudio, defeatedAudio, welcomeAudio } from './audio.js';
 import { WEAPON_ASSETS, spawnFloatingText, takeDamage, fireConfetti, createDeflectedProjectile, playWeaponBarrage, spawnFloatingIcons, triggerStatusEffect } from './effects.js';
 import { gameState } from './state.js';
 import { saveMatchToHistory, renderHallOfFame, triggerEndGame, updateUI } from './ui.js';
@@ -588,7 +588,11 @@ window.useBasicSkill = useBasicSkill;
 
                     this.state.currentQuestionFails = 0;
                     let quizItem = this.state.activePool.shift(); 
-                    let correctAnswer = quizItem.cotB;
+                    if (!quizItem) {
+                        console.warn("Quiz pool is empty! Cannot load next question.");
+                        return;
+                    }
+                    let correctAnswer = quizItem.cotB || "N/A";
                     
                     let otherOptions = this.state.dataPool.map(item => item.cotB).filter(val => val !== correctAnswer);
                     let uniqueDistractors = [...new Set(otherOptions)]; 
@@ -635,6 +639,7 @@ window.useBasicSkill = useBasicSkill;
 
                 renderQuizUI: function() {
                     let qState = this.state.currentQuiz;
+                    if (!qState) return;
                     let qImg = document.getElementById('quiz-q-img');
                     let qTxt = document.getElementById('quiz-q-txt');
                     let colAType = document.getElementById('col-a-type').value;

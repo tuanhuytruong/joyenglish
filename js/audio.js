@@ -1,6 +1,13 @@
-// ⚓ [NEO 0]: HỆ THỐNG ÂM THANH & CẤU HÌNH NGOÀI
-// ========================================================
-export const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// AudioContext is created lazily on first user interaction to comply with browser autoplay policies
+let audioCtx = null;
+function getAudioCtx() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+export { audioCtx, getAudioCtx };
             
             // ✂️ CẤU HÌNH MP3 NGOÀI & VOLUME ✂️
             export const EXTERNAL_AUDIO_VOLUMES = {
@@ -38,22 +45,23 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
             
             export function playSound(effectType) {
                 if (!effectType) return; 
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                try {
+                const ctx = getAudioCtx();
                 
-                const gain = audioCtx.createGain();
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
+                const gain = ctx.createGain();
+                gain.connect(ctx.destination);
+                const now = ctx.currentTime;
 
                 function createExplosion(duration, bassFreq, volume) {
-                    const bufferSize = Math.floor(audioCtx.sampleRate * duration); 
-                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const bufferSize = Math.floor(ctx.sampleRate * duration); 
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
                     const data = buffer.getChannelData(0);
                     for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
                     
-                    const noise = audioCtx.createBufferSource();
+                    const noise = ctx.createBufferSource();
                     noise.buffer = buffer;
                     
-                    const noiseFilter = audioCtx.createBiquadFilter();
+                    const noiseFilter = ctx.createBiquadFilter();
                     noiseFilter.type = 'lowpass';
                     noiseFilter.frequency.setValueAtTime(1000, now);
                     noiseFilter.frequency.exponentialRampToValueAtTime(50, now + duration);
@@ -62,7 +70,7 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
                     noiseFilter.connect(gain);
                     noise.start(now);
 
-                    const osc = audioCtx.createOscillator();
+                    const osc = ctx.createOscillator();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(bassFreq, now);
                     osc.frequency.exponentialRampToValueAtTime(10, now + duration);
@@ -75,7 +83,7 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
                 }
 
                 function createTone(type, freqStart, freqEnd, duration, volume) {
-                    const osc = audioCtx.createOscillator();
+                    const osc = ctx.createOscillator();
                     osc.type = type;
                     osc.frequency.setValueAtTime(freqStart, now);
                     if(freqEnd) osc.frequency.exponentialRampToValueAtTime(freqEnd, now + duration);
@@ -113,7 +121,7 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
                         createTone('sawtooth', 150, 50, 0.4, 0.3); // Gắt hơn một chút
                         break;
                     case 'kame_charge':
-                        const chargeOsc = audioCtx.createOscillator();
+                        const chargeOsc = ctx.createOscillator();
                         chargeOsc.type = 'sine';
                         chargeOsc.frequency.setValueAtTime(200, now);
                         chargeOsc.frequency.exponentialRampToValueAtTime(1500, now + 1.5);
@@ -127,13 +135,13 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
                     case 'bow_shoot': createTone('triangle', 800, 100, 0.15, 0.2); break;
                     case 'shield_hit_bloop': createTone('sine', 300, 800, 0.15, 0.5); break; 
                     case 'hp_hit': 
-                        const bs = Math.floor(audioCtx.sampleRate * 0.2); 
-                        const b = audioCtx.createBuffer(1, bs, audioCtx.sampleRate);
+                        const bs = Math.floor(ctx.sampleRate * 0.2); 
+                        const b = ctx.createBuffer(1, bs, ctx.sampleRate);
                         const d = b.getChannelData(0);
                         for (let i = 0; i < bs; i++) d[i] = Math.random() * 2 - 1;
-                        const n = audioCtx.createBufferSource();
+                        const n = ctx.createBufferSource();
                         n.buffer = b;
-                        const nf = audioCtx.createBiquadFilter();
+                        const nf = ctx.createBiquadFilter();
                         nf.type = 'lowpass'; nf.frequency.setValueAtTime(800, now);
                         n.connect(nf); nf.connect(gain);
                         gain.gain.setValueAtTime(0.4, now);
@@ -144,4 +152,5 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
                     case 'heal': createTone('sine', 400, 1200, 0.6, 0.2); break;
                     case 'deflect': createTone('sine', 800, 200, 0.1, 0.3); break;
                 }
+                } catch(e) { console.warn('Audio error (non-fatal):', e); }
             }
