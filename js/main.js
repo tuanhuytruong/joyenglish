@@ -261,7 +261,7 @@ window.useBasicSkill = useBasicSkill;
                 });
             });
 
-            const DEFAULT_AVATAR_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231e3a8a'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%2393c5fd'/%3E%3Cellipse cx='50' cy='85' rx='28' ry='20' fill='%2393c5fd'/%3E%3C/svg%3E`;
+            const DEFAULT_AVATAR_SVG = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFlM2E4YSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjOTNjNWZkIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iODUiIHJ4PSIyOCIgcnk9IjIwIiBmaWxsPSIjOTNjNWZkIi8+PC9zdmc+';
 
             function getAvatarHtml(val) {
                 if(!val) return "";
