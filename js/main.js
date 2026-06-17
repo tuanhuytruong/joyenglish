@@ -643,8 +643,15 @@ window.useBasicSkill = useBasicSkill;
                         if (!imgSource.startsWith('http') && !imgSource.startsWith('data:')) { imgSource = `images/${imgSource}.png`; }
                         qImg.src = imgSource;
                         qImg.onerror = function() {
-                            if (this.src.includes('.png')) this.src = this.src.replace('.png', '.jpg');
-                            else { this.onerror = null; this.src = `https://placehold.co/800x400/e2e8f0/475569?text=ERROR`; }
+                            if (this.src.includes('.png')) {
+                                this.src = this.src.replace('.png', '.jpg');
+                            } else {
+                                // Image not found — fall back to text display
+                                this.onerror = null;
+                                this.classList.add('hidden');
+                                qTxt.innerText = qState.questionImageOrText;
+                                qTxt.classList.remove('hidden');
+                            }
                         };
                         qImg.classList.remove('hidden'); qTxt.classList.add('hidden');
                     } else {
