@@ -4,6 +4,7 @@ import { gameState } from './state.js';
 import { saveMatchToHistory, renderHallOfFame, triggerEndGame, updateUI } from './ui.js';
 import { loadSettings, saveSettings } from './settings.js';
 import { triggerClickSkill, applyHealOverTime, playMeteorShower, playKamehamehaAnimation, useBasicSkill, triggerCooldownUI } from './skills.js';
+import { registerUploadedImages, clearUploadedImages, getUploadedImageCount, applyImageWithFallback } from './imageResolver.js';
 
 // Expose functions needed by inline HTML handlers and cross-module window references
 window.triggerClickSkill = triggerClickSkill;
@@ -132,12 +133,38 @@ window.useBasicSkill = useBasicSkill;
             const colBLbl = document.getElementById('col-b-lbl');
 
             function updateGridHeaders() {
-                colALbl.textContent = colATypeSelect.value === 'image' ? '(images/...)' : '(Text)';
-                colBLbl.textContent = colBTypeSelect.value === 'image' ? '(images/...)' : '(Text)';
+                colALbl.textContent = colATypeSelect.value === 'image' ? '(Upload / URL / images/)' : '(Text)';
+                colBLbl.textContent = colBTypeSelect.value === 'image' ? '(Upload / URL / images/)' : '(Text)';
+                refreshImagePreviews();
+            }
+
+            function refreshImagePreviews() {
                 document.querySelectorAll('.excel-input').forEach(inp => {
                     inp.dispatchEvent(new Event('input'));
                 });
             }
+
+            function refreshUploadedImagesCount() {
+                const uploadedCount = document.getElementById('uploaded-images-count');
+                if (uploadedCount) uploadedCount.textContent = `${getUploadedImageCount()} ảnh`;
+            }
+
+            const uploadInput = document.getElementById('image-upload-input');
+            const uploadBtn = document.getElementById('btn-upload-images');
+            const clearUploadBtn = document.getElementById('btn-clear-uploaded-images');
+
+            uploadBtn?.addEventListener('click', () => uploadInput?.click());
+            uploadInput?.addEventListener('change', () => {
+                registerUploadedImages(uploadInput.files);
+                uploadInput.value = '';
+                refreshUploadedImagesCount();
+                refreshImagePreviews();
+            });
+            clearUploadBtn?.addEventListener('click', () => {
+                clearUploadedImages();
+                refreshUploadedImagesCount();
+                refreshImagePreviews();
+            });
 
             colATypeSelect.addEventListener('change', updateGridHeaders);
             colBTypeSelect.addEventListener('change', updateGridHeaders);
@@ -154,16 +181,16 @@ window.useBasicSkill = useBasicSkill;
                     const val = this.value.trim();
 
                     if (type === 'image' && val !== '') {
-                        previewImg.src = `images/${val}.png`;
-                        previewImg.onerror = function() {
-                            if (this.src.includes('.png')) this.src = `images/${val}.jpg`;
-                            else { this.onerror = null; this.src = `https://placehold.co/32x32/f1f5f9/94a3b8?text=X`; }
-                        };
+                        applyImageWithFallback(previewImg, val, {
+                            onFail: () => {
+                                previewImg.src = 'https://placehold.co/32x32/f1f5f9/94a3b8?text=X';
+                            }
+                        });
                         previewImg.classList.remove('hidden');
                         this.style.paddingRight = '40px'; 
                     } else {
                         previewImg.classList.add('hidden');
-                        previewImg.src = '';
+                        previewImg.removeAttribute('src');
                         this.style.paddingRight = '8px';
                     }
                 });
@@ -646,21 +673,15 @@ window.useBasicSkill = useBasicSkill;
                     let colBType = document.getElementById('col-b-type').value;
                     
                     if (colAType === 'image') {
-                        let imgSource = qState.questionImageOrText;
-                        if (!imgSource.startsWith('http') && !imgSource.startsWith('data:')) { imgSource = `images/${imgSource}.png`; }
-                        qImg.src = imgSource;
-                        qImg.onerror = function() {
-                            if (this.src.includes('.png')) {
-                                this.src = this.src.replace('.png', '.jpg');
-                            } else {
-                                // Image not found — fall back to text display
-                                this.onerror = null;
-                                this.classList.add('hidden');
+                        qImg.classList.remove('hidden');
+                        qTxt.classList.add('hidden');
+                        applyImageWithFallback(qImg, qState.questionImageOrText, {
+                            onFail: () => {
+                                qImg.classList.add('hidden');
                                 qTxt.innerText = qState.questionImageOrText;
                                 qTxt.classList.remove('hidden');
                             }
-                        };
-                        qImg.classList.remove('hidden'); qTxt.classList.add('hidden');
+                        });
                     } else {
                         qTxt.innerText = qState.questionImageOrText;
                         qTxt.classList.remove('hidden'); qImg.classList.add('hidden');
@@ -671,9 +692,15 @@ window.useBasicSkill = useBasicSkill;
                         let spanTxt = btn.querySelector('span.text-3xl');
                         if (spanTxt && qState.options[index]) {
                             if (colBType === 'image') {
-                                let ansImgSource = qState.options[index];
-                                if (!ansImgSource.startsWith('http') && !ansImgSource.startsWith('data:')) { ansImgSource = `images/${ansImgSource}.png`; }
-                                spanTxt.innerHTML = `<img src="${ansImgSource}" class="w-full h-full max-h-24 object-contain drop-shadow-md" onerror="if(this.src.includes('.png'))this.src=this.src.replace('.png','.jpg');else this.style.display='none';">`;
+                                spanTxt.innerHTML = '';
+                                const ansImg = document.createElement('img');
+                                ansImg.className = 'w-full h-full max-h-24 object-contain drop-shadow-md';
+                                spanTxt.appendChild(ansImg);
+                                applyImageWithFallback(ansImg, qState.options[index], {
+                                    onFail: () => {
+                                        spanTxt.innerText = qState.options[index];
+                                    }
+                                });
                             } else { spanTxt.innerText = qState.options[index]; }
                         }
                     });

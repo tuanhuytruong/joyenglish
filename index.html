@@ -542,14 +542,14 @@
                                     <span class="font-bold text-sm text-gray-700">Cột A:</span>
                                     <select id="col-a-type" data-save="col_a_type" class="p-1.5 border border-gray-300 rounded outline-none text-sm font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
                                         <option value="text" selected>📝 Văn Bản (Text)</option>
-                                        <option value="image">🖼️ Hình Ảnh (Local)</option>
+                                        <option value="image">🖼️ Hình Ảnh (Auto)</option>
                                     </select>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="font-bold text-sm text-gray-700">Cột B:</span>
                                     <select id="col-b-type" data-save="col_b_type" class="p-1.5 border border-gray-300 rounded outline-none text-sm font-semibold bg-white cursor-pointer focus:ring-2 focus:ring-blue-500">
                                         <option value="text" selected>📝 Văn Bản (Text)</option>
-                                        <option value="image">🖼️ Hình Ảnh (Local)</option>
+                                        <option value="image">🖼️ Hình Ảnh (Auto)</option>
                                     </select>
                                 </div>
                             </div>
@@ -576,6 +576,17 @@
                                 <option value="sequential">Chế độ 1: Lần lượt theo thứ tự</option>
                                 <option value="random">Chế độ 2: Xáo trộn ngẫu nhiên</option>
                             </select>
+                        </div>
+
+                        <div class="flex flex-col gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg shadow-inner">
+                            <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Nguồn ảnh</span>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <input id="image-upload-input" type="file" accept="image/*" multiple class="hidden">
+                                <button id="btn-upload-images" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded text-sm font-bold shadow transition focus:outline-none">Upload Images</button>
+                                <button id="btn-clear-uploaded-images" type="button" class="bg-slate-500 hover:bg-slate-600 text-white px-3 py-1 rounded text-sm font-bold shadow transition focus:outline-none">Clear</button>
+                                <span id="uploaded-images-count" class="text-xs font-bold text-emerald-700">0 ảnh</span>
+                            </div>
+                            <p class="text-[11px] text-emerald-900 leading-snug">Nhập tên ảnh, URL ảnh, hoặc file trong repo images/.</p>
                         </div>
 
                         <div class="flex-grow"></div>
