@@ -1,0 +1,38 @@
+name: Deploy DEV Pages
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Prepare static site
+        run: |
+          mkdir -p /tmp/joyenglish-dev-site
+          rsync -av --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.hermes/' \
+            --exclude='docs/plans/' \
+            --exclude='.gitignore' \
+            ./ /tmp/joyenglish-dev-site/
+
+      - name: Deploy to joyenglish-dev repository
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.DEV_PAGES_TOKEN }}
+          external_repository: tuanhuytruong/joyenglish-dev
+          publish_branch: master
+          publish_dir: /tmp/joyenglish-dev-site
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
