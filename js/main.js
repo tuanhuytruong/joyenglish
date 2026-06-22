@@ -403,6 +403,21 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 if (el && textValue) el.innerText = textValue;
             }
 
+            function syncShopKeyHints() {
+                const mapping = {
+                    key_p1_shop_mana: 'ui-key-p1-shop-mana',
+                    key_p1_shop_shield: 'ui-key-p1-shop-shield',
+                    key_p1_shop_double: 'ui-key-p1-shop-double',
+                    key_p2_shop_mana: 'ui-key-p2-shop-mana',
+                    key_p2_shop_shield: 'ui-key-p2-shop-shield',
+                    key_p2_shop_double: 'ui-key-p2-shop-double'
+                };
+                Object.entries(mapping).forEach(([saveKey, hintId]) => {
+                    const input = document.querySelector(`[data-save="${saveKey}"]`);
+                    safeSetText(hintId, input?.value || '');
+                });
+            }
+
             function applyPreset(presetId, { updateInputs = true } = {}) {
                 const presetKey = GAME_PRESETS[presetId] ? presetId : 'classic';
                 const preset = GAME_PRESETS[presetKey];
@@ -430,6 +445,9 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
             });
+            document.querySelectorAll('[data-save^="key_"]').forEach(inp => {
+                inp.addEventListener('change', syncShopKeyHints);
+            });
 
             document.getElementById('save-and-close-btn').addEventListener('click', function() {
                 try {
@@ -452,6 +470,13 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     
                     safeSetText('ui-key-p2-s1', savedKeys.key_p2_s1); safeSetText('ui-key-p2-s2', savedKeys.key_p2_s2);
                     safeSetText('ui-key-p2-s3', savedKeys.key_p2_s3); safeSetText('ui-key-p2-ult', savedKeys.key_p2_ult);
+
+                    safeSetText('ui-key-p1-shop-mana', savedKeys.key_p1_shop_mana);
+                    safeSetText('ui-key-p1-shop-shield', savedKeys.key_p1_shop_shield);
+                    safeSetText('ui-key-p1-shop-double', savedKeys.key_p1_shop_double);
+                    safeSetText('ui-key-p2-shop-mana', savedKeys.key_p2_shop_mana);
+                    safeSetText('ui-key-p2-shop-shield', savedKeys.key_p2_shop_shield);
+                    safeSetText('ui-key-p2-shop-double', savedKeys.key_p2_shop_double);
 
                     const p1Av = document.getElementById('p1-avatar-input').value;
                     const p2Av = document.getElementById('p2-avatar-input').value;
@@ -559,6 +584,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
             } else {
                 applyPreset('classic');
             }
+            syncShopKeyHints();
             if (loaded.gridData && loaded.gridData.length > 0) {
                 const tbody = document.getElementById('grid-body');
                 tbody.innerHTML = ''; 
@@ -1034,6 +1060,17 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 if (key === p2_s2) { window.triggerClickSkill('p2', 'atk'); return; }
                 if (key === p2_s1) { window.triggerClickSkill('p2', 'def'); return; }
                 if (key === p2_s3) { window.triggerClickSkill('p2', 'heal'); return; }
+
+                const shopKeys = [
+                    ['p1', 'mana', document.getElementById('ui-key-p1-shop-mana')?.innerText.trim().toUpperCase()],
+                    ['p1', 'shield', document.getElementById('ui-key-p1-shop-shield')?.innerText.trim().toUpperCase()],
+                    ['p1', 'double', document.getElementById('ui-key-p1-shop-double')?.innerText.trim().toUpperCase()],
+                    ['p2', 'mana', document.getElementById('ui-key-p2-shop-mana')?.innerText.trim().toUpperCase()],
+                    ['p2', 'shield', document.getElementById('ui-key-p2-shop-shield')?.innerText.trim().toUpperCase()],
+                    ['p2', 'double', document.getElementById('ui-key-p2-shop-double')?.innerText.trim().toUpperCase()]
+                ];
+                const shopMatch = shopKeys.find(([, , shopKey]) => shopKey && key === shopKey);
+                if (shopMatch) { window.triggerClickShop(shopMatch[0], shopMatch[1]); return; }
 
                 let p1Index = p1_keys.indexOf(key);
                 if (p1Index !== -1) { window.GameplayManager.handlePlayerAnswer('p1', p1Index); return; }

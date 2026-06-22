@@ -335,9 +335,9 @@
                 </div>
                 <!-- Vùng Buttons P1 -->
                 <div id="shop-p1" class="player-shop-panel border-cyan-400/50">
-                    <button onclick="triggerClickShop('p1', 'mana')" id="shop-p1-mana" class="shop-btn" title="+2 Mana">⚡ $20</button>
-                    <button onclick="triggerClickShop('p1', 'shield')" id="shop-p1-shield" class="shop-btn" title="+25 Shield">🛡️ $30</button>
-                    <button onclick="triggerClickShop('p1', 'double')" id="shop-p1-double" class="shop-btn" title="2x cash for next 3 correct answers">💎 $40</button>
+                    <button onclick="triggerClickShop('p1', 'mana')" id="shop-p1-mana" class="shop-btn" title="+2 Mana">⚡ $20 <span id="ui-key-p1-shop-mana" class="shop-key-hint">1</span></button>
+                    <button onclick="triggerClickShop('p1', 'shield')" id="shop-p1-shield" class="shop-btn" title="+25 Shield">🛡️ $30 <span id="ui-key-p1-shop-shield" class="shop-key-hint">2</span></button>
+                    <button onclick="triggerClickShop('p1', 'double')" id="shop-p1-double" class="shop-btn" title="2x cash for next 3 correct answers">💎 $40 <span id="ui-key-p1-shop-double" class="shop-key-hint">3</span></button>
                 </div>
                 <div id="actions-p1" class="flex gap-2 bg-black/50 p-2 rounded-full border border-gray-600 backdrop-blur-md shrink-0 shadow-xl transition-all">
                     <div class="flex flex-col items-center relative w-12 h-12">
@@ -400,9 +400,9 @@
                         <div id="p2-mana-bar" class="h-full w-[0%] bg-gradient-to-l from-fuchsia-600 to-rose-500 shadow-[0_0_15px_fuchsia] rounded-full transition-all origin-right float-right"></div>
                         <span id="p2-mana-txt" class="absolute inset-0 flex items-center justify-center text-fuchsia-100 font-bold text-sm text-shadow tracking-widest">Mana: 0/10</span>
                     </div>
-                    <div class="player-reward-strip is-p2 justify-end border-orange-400/50 text-orange-50">
-                        <span>🔥 Streak <strong id="p2-streak-txt">0</strong></span>
+                    <div class="player-reward-strip is-p2 border-orange-400/50 text-orange-50">
                         <span>💰 <strong id="p2-cash-txt">$0</strong></span>
+                        <span>🔥 Streak <strong id="p2-streak-txt">0</strong></span>
                     </div>
                 </div>
             </div>
@@ -419,9 +419,9 @@
                 </div>
                 <!-- Vùng Buttons P2 -->
                 <div id="shop-p2" class="player-shop-panel border-orange-400/50">
-                    <button onclick="triggerClickShop('p2', 'mana')" id="shop-p2-mana" class="shop-btn" title="+2 Mana">⚡ $20</button>
-                    <button onclick="triggerClickShop('p2', 'shield')" id="shop-p2-shield" class="shop-btn" title="+25 Shield">🛡️ $30</button>
-                    <button onclick="triggerClickShop('p2', 'double')" id="shop-p2-double" class="shop-btn" title="2x cash for next 3 correct answers">💎 $40</button>
+                    <button onclick="triggerClickShop('p2', 'mana')" id="shop-p2-mana" class="shop-btn" title="+2 Mana">⚡ $20 <span id="ui-key-p2-shop-mana" class="shop-key-hint">7</span></button>
+                    <button onclick="triggerClickShop('p2', 'shield')" id="shop-p2-shield" class="shop-btn" title="+25 Shield">🛡️ $30 <span id="ui-key-p2-shop-shield" class="shop-key-hint">8</span></button>
+                    <button onclick="triggerClickShop('p2', 'double')" id="shop-p2-double" class="shop-btn" title="2x cash for next 3 correct answers">💎 $40 <span id="ui-key-p2-shop-double" class="shop-key-hint">9</span></button>
                 </div>
                 <div id="actions-p2" class="flex gap-2 bg-black/50 p-2 rounded-full border border-gray-600 backdrop-blur-md shrink-0 shadow-xl transition-all">
                     <div class="flex flex-col items-center relative w-12 h-12">
@@ -912,6 +912,13 @@
                                 <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">✚ Hồi Máu</span><input type="text" readonly data-save="key_p1_s3" value="E" class="keybind-input w-full h-14 bg-blue-100 border-2 border-blue-400 rounded-lg text-blue-800 shadow-inner"></div>
                             </div>
 
+                            <h4 class="font-bold text-blue-900 mb-3 border-b border-blue-200 pb-1">Phím Shop Boss Raid</h4>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">⚡ Mana</span><input type="text" readonly data-save="key_p1_shop_mana" value="1" class="keybind-input w-full h-14 bg-amber-100 border-2 border-amber-400 rounded-lg text-amber-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🛡️ Shield</span><input type="text" readonly data-save="key_p1_shop_shield" value="2" class="keybind-input w-full h-14 bg-amber-100 border-2 border-amber-400 rounded-lg text-amber-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">💎 Double</span><input type="text" readonly data-save="key_p1_shop_double" value="3" class="keybind-input w-full h-14 bg-amber-100 border-2 border-amber-400 rounded-lg text-amber-800 shadow-inner"></div>
+                            </div>
+
                             <h4 class="font-bold text-blue-900 mb-3 border-b border-blue-200 pb-1 mt-auto">Phím Tung Chiêu (Ultimate)</h4>
                             <div class="flex justify-center">
                                 <div class="flex flex-col items-center gap-2 w-1/2">
@@ -938,6 +945,13 @@
                                 <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🛡️ Giáp</span><input type="text" readonly data-save="key_p2_s1" value="U" class="keybind-input w-full h-14 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 shadow-inner"></div>
                                 <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🏹 Tấn Công</span><input type="text" readonly data-save="key_p2_s2" value="I" class="keybind-input w-full h-14 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 shadow-inner"></div>
                                 <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">✚ Hồi Máu</span><input type="text" readonly data-save="key_p2_s3" value="O" class="keybind-input w-full h-14 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 shadow-inner"></div>
+                            </div>
+
+                            <h4 class="font-bold text-red-900 mb-3 border-b border-red-200 pb-1">Phím Shop Boss Raid</h4>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">⚡ Mana</span><input type="text" readonly data-save="key_p2_shop_mana" value="7" class="keybind-input w-full h-14 bg-amber-100 border-2 border-amber-400 rounded-lg text-amber-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">🛡️ Shield</span><input type="text" readonly data-save="key_p2_shop_shield" value="8" class="keybind-input w-full h-14 bg-amber-100 border-2 border-amber-400 rounded-lg text-amber-800 shadow-inner"></div>
+                                <div class="flex flex-col items-center gap-1"><span class="text-xs font-bold text-gray-500">💎 Double</span><input type="text" readonly data-save="key_p2_shop_double" value="9" class="keybind-input w-full h-14 bg-amber-100 border-2 border-amber-400 rounded-lg text-amber-800 shadow-inner"></div>
                             </div>
 
                             <h4 class="font-bold text-red-900 mb-3 border-b border-red-200 pb-1 mt-auto">Phím Tung Chiêu (Ultimate)</h4>
