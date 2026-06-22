@@ -17,6 +17,13 @@ window.triggerEndGame = triggerEndGame;
 window.applyHealOverTime = applyHealOverTime;
 window.triggerCooldownUI = triggerCooldownUI;
 window.useBasicSkill = useBasicSkill;
+window.triggerClickShop = function(playerPrefix, upgradeId) {
+    if (!window.GameplayManager || typeof window.GameplayManager.buyUpgrade !== 'function') {
+        console.warn('Shop is not ready yet');
+        return;
+    }
+    window.GameplayManager.buyUpgrade(playerPrefix, upgradeId);
+};
 
         window.triggerClickAnswer = function(playerPrefix, index) {
             if (window.GameplayManager) {
@@ -287,6 +294,11 @@ window.useBasicSkill = useBasicSkill;
                     if(activeKeybindInput) return; 
                     const row = parseInt(this.dataset.row); 
                     const col = this.dataset.col; 
+                    if (e.key === 'Tab' && !e.shiftKey && col === 'colB' && row === currentRowCount) {
+                        e.preventDefault();
+                        addDataRow({ focus: true });
+                        return;
+                    }
                     let nextRow = row; let nextInput = null;
                     if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); nextRow = row < currentRowCount ? row + 1 : row; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
                     else if (e.key === 'ArrowUp') { e.preventDefault(); nextRow = row > 1 ? row - 1 : 1; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
@@ -321,32 +333,20 @@ window.useBasicSkill = useBasicSkill;
                 updateSetupStatus();
             }
 
+            function addDataRow({ focus = true } = {}) {
+                createGridRow(currentRowCount + 1);
+                if (focus) {
+                    document.querySelector(`.excel-input[data-col="colA"][data-row="${currentRowCount}"]`)?.focus();
+                }
+                updateSetupStatus();
+            }
+
             for (let i = 1; i <= 5; i++) { createGridRow(i); }
             updateGridHeaders();
+            document.getElementById('btn-add-row')?.addEventListener('click', () => addDataRow());
 
             document.querySelectorAll('.sample-data-btn').forEach(btn => {
                 btn.addEventListener('click', () => fillSampleData(btn.dataset.sample));
-            });
-
-            document.getElementById('btn-auto-fill').addEventListener('click', () => {
-                const targetCol = document.getElementById('autofill-target').value;
-                const start = parseInt(document.getElementById('autofill-start').value);
-                const end = parseInt(document.getElementById('autofill-end').value);
-                
-                if(isNaN(start) || isNaN(end) || start > end) { alert("Khoảng số không hợp lệ!"); return; }
-                const count = end - start + 1;
-                while (currentRowCount < count) { createGridRow(currentRowCount + 1); }
-                let currentNum = start;
-                for(let r = 1; r <= count; r++) {
-                    const checkbox = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`);
-                    if(targetCol === 'colC') {
-                        if(checkbox) checkbox.checked = true;
-                    } else {
-                        const input = document.querySelector(`.excel-input[data-col="${targetCol}"][data-row="${r}"]`);
-                        if(input) { input.value = currentNum; input.dispatchEvent(new Event('input')); currentNum++; }
-                        if(checkbox) checkbox.checked = true;
-                    }
-                }
             });
 
             document.getElementById('btn-clear-data').addEventListener('click', () => {
