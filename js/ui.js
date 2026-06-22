@@ -186,6 +186,19 @@ export function saveMatchToHistory(winnerPrefix, durationStr) {
                         document.getElementById(`${p}-mana-txt`).innerText = `Mana: ${player.mana}/10`;
                         document.getElementById(`${p}-mana-bar`).style.width = `${(player.mana / 10) * 100}%`;
 
+                        const cashEl = document.getElementById(`${p}-cash-txt`);
+                        if (cashEl) cashEl.innerText = `$${Math.round(player.cash || 0)}`;
+                        const streakEl = document.getElementById(`${p}-streak-txt`);
+                        if (streakEl) streakEl.innerText = player.streak || 0;
+                        const shopCosts = { mana: 20, shield: 30, double: 40 };
+                        Object.entries(shopCosts).forEach(([upgradeId, cost]) => {
+                            const btn = document.getElementById(`shop-${p}-${upgradeId}`);
+                            if (!btn) return;
+                            const disabled = !window.GameplayManager?.state?.isPlaying || (player.cash || 0) < cost;
+                            btn.disabled = disabled;
+                            btn.classList.toggle('is-disabled', disabled);
+                        });
+
                         let q1 = document.getElementById(`${p}-queue-1`);
                         let q2 = document.getElementById(`${p}-queue-2`);
                         

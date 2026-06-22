@@ -149,6 +149,93 @@ window.useBasicSkill = useBasicSkill;
                 if (uploadedCount) uploadedCount.textContent = `${getUploadedImageCount()} ảnh`;
             }
 
+            function collectActiveGridData() {
+                const rows = [];
+                for (let r = 1; r <= currentRowCount; r++) {
+                    const colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value?.trim();
+                    const colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value?.trim();
+                    const active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
+                    if (colA && colB && active) rows.push({ cotA: colA, cotB: colB, active });
+                }
+                return rows;
+            }
+
+            function updateSetupStatus() {
+                const card = document.getElementById('setup-status-card');
+                const text = document.getElementById('setup-status-text');
+                if (!card || !text) return;
+                const rows = collectActiveGridData();
+                const uniqueAnswers = new Set(rows.map(row => row.cotB));
+                card.classList.remove('ready', 'warning', 'error');
+                if (rows.length === 0) {
+                    card.classList.add('error');
+                    card.firstElementChild.textContent = '⚠️ Chưa có data';
+                    text.textContent = 'Cần ít nhất 4 dòng active';
+                } else if (rows.length < 4 || uniqueAnswers.size < 4) {
+                    card.classList.add('warning');
+                    card.firstElementChild.textContent = '⚠️ Cần thêm đáp án';
+                    text.textContent = `${rows.length} câu, ${uniqueAnswers.size} đáp án khác nhau`;
+                } else {
+                    card.classList.add('ready');
+                    card.firstElementChild.textContent = '✅ Sẵn sàng';
+                    text.textContent = `${rows.length} câu active, ${uniqueAnswers.size} đáp án`;
+                }
+            }
+
+            function showAnswerFeedback(answerIndex, message, type) {
+                const card = document.querySelectorAll('#answers-container > div')[answerIndex];
+                if (!card) return;
+                const rect = card.getBoundingClientRect();
+                const pop = document.createElement('div');
+                pop.className = `answer-feedback-pop ${type}`;
+                pop.textContent = message;
+                pop.style.left = `${rect.left + rect.width / 2}px`;
+                pop.style.top = `${rect.top + rect.height / 2}px`;
+                document.body.appendChild(pop);
+                setTimeout(() => pop.remove(), 1200);
+            }
+
+            function showShopToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `shop-toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 1100);
+            }
+
+
+            const SAMPLE_DATA_SETS = {
+                animals: [
+                    ['cat', 'mèo'], ['dog', 'chó'], ['bird', 'chim'], ['fish', 'cá'],
+                    ['rabbit', 'thỏ'], ['tiger', 'hổ'], ['monkey', 'khỉ'], ['elephant', 'voi']
+                ],
+                classroom: [
+                    ['book', 'sách'], ['pen', 'bút'], ['desk', 'bàn học'], ['chair', 'ghế'],
+                    ['board', 'bảng'], ['teacher', 'giáo viên'], ['student', 'học sinh'], ['bag', 'cặp sách']
+                ],
+                actions: [
+                    ['run', 'chạy'], ['jump', 'nhảy'], ['read', 'đọc'], ['write', 'viết'],
+                    ['listen', 'nghe'], ['speak', 'nói'], ['draw', 'vẽ'], ['sing', 'hát']
+                ]
+            };
+
+            function fillSampleData(sampleKey) {
+                const rows = SAMPLE_DATA_SETS[sampleKey] || SAMPLE_DATA_SETS.animals;
+                while (currentRowCount < rows.length) { createGridRow(currentRowCount + 1); }
+                for (let r = 1; r <= currentRowCount; r++) {
+                    const pair = rows[r - 1] || ['', ''];
+                    const colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`);
+                    const colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`);
+                    const checkbox = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`);
+                    if (colA) { colA.value = pair[0]; colA.dispatchEvent(new Event('input')); }
+                    if (colB) { colB.value = pair[1]; colB.dispatchEvent(new Event('input')); }
+                    if (checkbox) checkbox.checked = Boolean(pair[0] && pair[1]);
+                }
+                document.querySelectorAll('.sample-data-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.sample === sampleKey));
+                updateSetupStatus();
+                showShopToast(`Loaded ${rows.length} ${sampleKey} questions`, 'success');
+            }
+
             const uploadInput = document.getElementById('image-upload-input');
             const uploadBtn = document.getElementById('btn-upload-images');
             const clearUploadBtn = document.getElementById('btn-clear-uploaded-images');
@@ -193,6 +280,7 @@ window.useBasicSkill = useBasicSkill;
                         previewImg.removeAttribute('src');
                         this.style.paddingRight = '8px';
                     }
+                    updateSetupStatus();
                 });
 
                 input.addEventListener('keydown', function(e) {
@@ -228,11 +316,17 @@ window.useBasicSkill = useBasicSkill;
                 `;
                 tbody.appendChild(tr);
                 tr.querySelectorAll('.excel-input').forEach(attachInputListeners);
+                tr.querySelector('.custom-checkbox')?.addEventListener('change', updateSetupStatus);
                 currentRowCount = i;
+                updateSetupStatus();
             }
 
             for (let i = 1; i <= 5; i++) { createGridRow(i); }
             updateGridHeaders();
+
+            document.querySelectorAll('.sample-data-btn').forEach(btn => {
+                btn.addEventListener('click', () => fillSampleData(btn.dataset.sample));
+            });
 
             document.getElementById('btn-auto-fill').addEventListener('click', () => {
                 const targetCol = document.getElementById('autofill-target').value;
@@ -299,13 +393,44 @@ window.useBasicSkill = useBasicSkill;
                 else { return `<img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';}" class="w-full h-full object-cover pointer-events-none bg-black" />`; }
             }
 
+            const GAME_PRESETS = {
+                classic: { label: 'Classic Battle', quizMode: 'sequential', bossHp: 1000, heroHp: 100, stunTime: 2, timerSeconds: 180, rewardMultiplier: 1 },
+                warmup: { label: 'Quick Warmup', quizMode: 'random', bossHp: 700, heroHp: 120, stunTime: 1.5, timerSeconds: 90, rewardMultiplier: 1.15 },
+                drill: { label: 'Vocabulary Drill', quizMode: 'sequential', bossHp: 900, heroHp: 140, stunTime: 1, timerSeconds: 240, rewardMultiplier: 1 },
+                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35 }
+            };
+
             function safeSetText(elementId, textValue) {
                 const el = document.getElementById(elementId);
                 if (el && textValue) el.innerText = textValue;
             }
 
+            function applyPreset(presetId, { updateInputs = true } = {}) {
+                const presetKey = GAME_PRESETS[presetId] ? presetId : 'classic';
+                const preset = GAME_PRESETS[presetKey];
+                const hidden = document.getElementById('setting_game_preset');
+                if (hidden) hidden.value = presetKey;
+                document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.preset === presetKey));
+                if (updateInputs) {
+                    const quizMode = document.getElementById('setting_quiz_mode');
+                    const bossHp = document.getElementById('boss-max-hp');
+                    const heroHp = document.getElementById('hero-max-hp');
+                    const stunTime = document.getElementById('setting_stun_time');
+                    if (quizMode) quizMode.value = preset.quizMode;
+                    if (bossHp) bossHp.value = preset.bossHp;
+                    if (heroHp) heroHp.value = preset.heroHp;
+                    if (stunTime) stunTime.value = preset.stunTime;
+                }
+                const hudMode = document.getElementById('hud-mode-label');
+                if (hudMode) hudMode.innerText = preset.label;
+            }
+
             const svgTick = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(34,197,94,0.8)]"><svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div>`;
             const svgCross = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(239,68,68,0.8)]"><svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></div>`;
+
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+            });
 
             document.getElementById('save-and-close-btn').addEventListener('click', function() {
                 try {
@@ -334,13 +459,7 @@ window.useBasicSkill = useBasicSkill;
                     if(p1Av) { let avHtml = getAvatarHtml(p1Av); document.getElementById('p1-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p1-avatar').innerHTML = avHtml; }
                     if(p2Av) { let avHtml = getAvatarHtml(p2Av); document.getElementById('p2-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p2-avatar').innerHTML = avHtml; }
 
-                    let gridData = [];
-                    for (let r = 1; r <= currentRowCount; r++) {
-                        let colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value;
-                        let colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value;
-                        let active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
-                        if (colA && colB && active) { gridData.push({ cotA: colA, cotB: colB, active: active }); }
-                    }
+                    let gridData = collectActiveGridData();
                     
                     saveSettings(gridData);
                     
@@ -437,6 +556,9 @@ window.useBasicSkill = useBasicSkill;
                         el.dispatchEvent(new Event('change')); 
                     }
                 });
+                applyPreset(document.getElementById('setting_game_preset')?.value || 'classic', { updateInputs: false });
+            } else {
+                applyPreset('classic');
             }
             if (loaded.gridData && loaded.gridData.length > 0) {
                 const tbody = document.getElementById('grid-body');
@@ -449,6 +571,7 @@ window.useBasicSkill = useBasicSkill;
                     document.querySelector(`.custom-checkbox[data-col="active"][data-row="${index + 1}"]`).checked = row.active;
                 });
             }
+            updateSetupStatus();
 
             // =========================================================================
             // --- [MODULE: GAMEPLAY_MANAGER_CORE] ---
@@ -466,12 +589,21 @@ window.useBasicSkill = useBasicSkill;
                     this.state.totalQuestions = gridData.length;
                     this.state.questionsPassed = 1;
                     
-                    this.state.mode = document.getElementById('setting_quiz_mode')?.value || 'sequential';
-                    this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || 2) * 1000;
+                    this.state.preset = document.getElementById('setting_game_preset')?.value || 'classic';
+                    const activePreset = GAME_PRESETS[this.state.preset] || GAME_PRESETS.classic;
+                    this.state.mode = document.getElementById('setting_quiz_mode')?.value || activePreset.quizMode || 'sequential';
+                    const hudMode = document.getElementById('hud-mode-label');
+                    if (hudMode) hudMode.innerText = activePreset.label;
+                    this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || activePreset.stunTime || 2) * 1000;
                     
                     this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || 100;
                     this.state.p2.maxHp = this.state.p2.hp = parseInt(document.getElementById('boss-max-hp')?.value) || 1000;
                     this.state.p1.mana = 0; this.state.p2.mana = 0;
+                    this.state.p1.cash = 0; this.state.p2.cash = 0;
+                    this.state.p1.streak = 0; this.state.p2.streak = 0;
+                    this.state.p1.bestStreak = 0; this.state.p2.bestStreak = 0;
+                    this.state.p1.multiplier = activePreset.rewardMultiplier || 1; this.state.p2.multiplier = activePreset.rewardMultiplier || 1;
+                    this.state.p1.multiplierTurns = 0; this.state.p2.multiplierTurns = 0;
                     this.state.p1.isStunned = false; this.state.p2.isStunned = false;
                     this.state.p1.isFrozen = false; this.state.p2.isFrozen = false;
                     this.state.p1.queue = []; this.state.p2.queue = [];
@@ -517,8 +649,9 @@ window.useBasicSkill = useBasicSkill;
                 startSuddenDeathTimer: function() {
                     if (this.suddenDeathTimer) clearInterval(this.suddenDeathTimer);
                     
-                    let limitMinutes = parseFloat(document.getElementById('sudden-death-time')?.value) || 3;
-                    let limitSec = limitMinutes * 60;
+                    const activePreset = GAME_PRESETS[this.state.preset] || GAME_PRESETS.classic;
+                    let limitMinutes = parseFloat(document.getElementById('sudden-death-time')?.value) || (activePreset.timerSeconds / 60) || 3;
+                    let limitSec = activePreset.timerSeconds || (limitMinutes * 60);
                     let sdDmg = parseFloat(document.getElementById('sudden-death-dmg')?.value) || 5;
                     let timerEl = document.getElementById('quiz-timer');
                     
@@ -725,6 +858,26 @@ window.useBasicSkill = useBasicSkill;
                     this.updateUI();
                 },
 
+                buyUpgrade: function(playerPrefix, upgradeId) {
+                    const player = this.state[playerPrefix];
+                    if (!player || !this.state.isPlaying) return;
+                    const upgrades = {
+                        mana: { cost: 20, label: '+2 Mana', apply: () => { player.mana = Math.min(10, (player.mana || 0) + 2); } },
+                        shield: { cost: 30, label: '+25 Shield', apply: () => { player.shield = Math.min(99, (player.shield || 0) + 25); } },
+                        double: { cost: 40, label: '2x Cash x3', apply: () => { player.multiplier = 2; player.multiplierTurns = 3; } }
+                    };
+                    const upgrade = upgrades[upgradeId];
+                    if (!upgrade) return;
+                    if ((player.cash || 0) < upgrade.cost) {
+                        showShopToast(`${player.name}: need $${upgrade.cost}`, 'warning');
+                        return;
+                    }
+                    player.cash -= upgrade.cost;
+                    upgrade.apply();
+                    showShopToast(`${player.name} bought ${upgrade.label}!`);
+                    this.updateUI();
+                },
+
                 handlePlayerAnswer: function(playerPrefix, selectedAnswerIndex) {
                     if (!this.state.isPlaying || this.state.isTransitioning) return;
                     let player = this.state[playerPrefix];
@@ -747,6 +900,18 @@ window.useBasicSkill = useBasicSkill;
                         icon.classList.replace('scale-0', 'scale-100');
                         
                         playSound('correct');
+                        player.streak = (player.streak || 0) + 1;
+                        player.bestStreak = Math.max(player.bestStreak || 0, player.streak);
+                        const streakBonus = Math.floor(player.streak / 3) * 5;
+                        const activeMultiplier = player.multiplier || 1;
+                        const cashReward = Math.round((10 + streakBonus) * activeMultiplier);
+                        player.cash = (player.cash || 0) + cashReward;
+                        if ((player.multiplierTurns || 0) > 0) {
+                            player.multiplierTurns -= 1;
+                            if (player.multiplierTurns <= 0) player.multiplier = 1;
+                        }
+                        const multiplierText = activeMultiplier > 1 ? ` x${activeMultiplier}` : '';
+                        showAnswerFeedback(selectedAnswerIndex, `+$${cashReward}${multiplierText} | 🔥${player.streak}`, 'correct');
                         this.addMana(playerPrefix, 1);
                         this.state.questionsPassed++; // Tăng câu hỏi khi đúng
                         
@@ -759,6 +924,8 @@ window.useBasicSkill = useBasicSkill;
                         icon.classList.replace('scale-0', 'scale-100');
 
                         playSound('wrong');
+                        player.streak = 0;
+                        showAnswerFeedback(selectedAnswerIndex, 'Stunned! Streak reset', 'wrong');
 
                         let oldCapacity = Math.floor(player.mana / 5);
                         player.mana = Math.max(0, player.mana - 1);

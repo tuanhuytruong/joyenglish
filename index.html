@@ -15,6 +15,7 @@
         });
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
     <script>
         tailwind.config = {
             theme: {
@@ -270,10 +271,16 @@
         <!-- ========================================== -->
         <!-- TIMER & Q COUNTER -->
         <!-- ========================================== -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-slate-800 to-indigo-950 text-indigo-100 font-black px-8 py-2 rounded-full border-2 border-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.6)] flex items-center gap-6 z-40">
-            <span class="text-xl flex items-center gap-2">⏱️ <span id="quiz-timer" class="tracking-widest">03:00</span></span>
-            <span class="text-indigo-400/50 text-xl">|</span>
-            <span class="text-lg">Q: <span id="quiz-counter" class="text-xl tracking-wider text-yellow-300">1/20</span></span>
+        <div id="game-hud" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 game-hud-panel">
+            <div class="hud-main-row">
+                <span class="hud-pill hud-mode">🎮 <span id="hud-mode-label">Classic Battle</span></span>
+                <span class="hud-pill">⏱️ <span id="quiz-timer" class="tracking-widest">03:00</span></span>
+                <span class="hud-pill">Q: <span id="quiz-counter" class="text-yellow-300">1/20</span></span>
+            </div>
+            <div class="hud-help-row">
+                <span>✅ Đúng: +Mana, +Cash, +Streak</span>
+                <span>❌ Sai: Stun & reset streak</span>
+            </div>
         </div>
 
         <!-- ========================================== -->
@@ -309,6 +316,10 @@
                         <div id="p1-mana-bar" class="h-full w-[0%] bg-gradient-to-r from-cyan-400 to-blue-600 shadow-[0_0_15px_cyan] rounded-full transition-all"></div>
                         <span id="p1-mana-txt" class="absolute inset-0 flex items-center justify-center text-cyan-100 font-bold text-sm text-shadow tracking-widest">Mana: 0/10</span>
                     </div>
+                    <div class="player-reward-strip border-cyan-400/50 text-cyan-50">
+                        <span>💰 <strong id="p1-cash-txt">$0</strong></span>
+                        <span>🔥 Streak <strong id="p1-streak-txt">0</strong></span>
+                    </div>
                 </div>
             </div>
 
@@ -323,6 +334,11 @@
                     </div>
                 </div>
                 <!-- Vùng Buttons P1 -->
+                <div id="shop-p1" class="player-shop-panel border-cyan-400/50">
+                    <button onclick="triggerClickShop('p1', 'mana')" id="shop-p1-mana" class="shop-btn" title="+2 Mana">⚡ $20</button>
+                    <button onclick="triggerClickShop('p1', 'shield')" id="shop-p1-shield" class="shop-btn" title="+25 Shield">🛡️ $30</button>
+                    <button onclick="triggerClickShop('p1', 'double')" id="shop-p1-double" class="shop-btn" title="2x cash for next 3 correct answers">💎 $40</button>
+                </div>
                 <div id="actions-p1" class="flex gap-4 bg-black/50 p-3 rounded-full border border-gray-600 backdrop-blur-md shrink-0 shadow-xl transition-all">
                     <div class="flex flex-col items-center relative w-14 h-14">
                         <button id="btn-p1-atk" onclick="triggerClickSkill('p1', 'atk')" class="cd-btn w-full h-full bg-gray-800 border-2 border-orange-500 rounded-full text-orange-400 text-2xl shadow-[0_0_15px_rgba(251,146,60,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
@@ -384,6 +400,10 @@
                         <div id="p2-mana-bar" class="h-full w-[0%] bg-gradient-to-l from-fuchsia-600 to-rose-500 shadow-[0_0_15px_fuchsia] rounded-full transition-all origin-right float-right"></div>
                         <span id="p2-mana-txt" class="absolute inset-0 flex items-center justify-center text-fuchsia-100 font-bold text-sm text-shadow tracking-widest">Mana: 0/10</span>
                     </div>
+                    <div class="player-reward-strip justify-end border-orange-400/50 text-orange-50">
+                        <span>🔥 Streak <strong id="p2-streak-txt">0</strong></span>
+                        <span>💰 <strong id="p2-cash-txt">$0</strong></span>
+                    </div>
                 </div>
             </div>
 
@@ -398,6 +418,11 @@
                     </div>
                 </div>
                 <!-- Vùng Buttons P2 -->
+                <div id="shop-p2" class="player-shop-panel border-orange-400/50">
+                    <button onclick="triggerClickShop('p2', 'mana')" id="shop-p2-mana" class="shop-btn" title="+2 Mana">⚡ $20</button>
+                    <button onclick="triggerClickShop('p2', 'shield')" id="shop-p2-shield" class="shop-btn" title="+25 Shield">🛡️ $30</button>
+                    <button onclick="triggerClickShop('p2', 'double')" id="shop-p2-double" class="shop-btn" title="2x cash for next 3 correct answers">💎 $40</button>
+                </div>
                 <div id="actions-p2" class="flex gap-4 bg-black/50 p-3 rounded-full border border-gray-600 backdrop-blur-md shrink-0 shadow-xl transition-all">
                     <div class="flex flex-col items-center relative w-14 h-14">
                         <button id="btn-p2-atk" onclick="triggerClickSkill('p2', 'atk')" class="cd-btn w-full h-full bg-gray-800 border-2 border-orange-500 rounded-full text-orange-400 text-2xl shadow-[0_0_15px_rgba(251,146,60,0.5)] flex items-center justify-center hover:scale-110 opacity-90 hover:opacity-100 transition-all focus:outline-none relative cursor-pointer">
@@ -578,6 +603,22 @@
                             </select>
                         </div>
 
+                        <div class="preset-panel">
+                            <div class="preset-label">🎯 GAME PRESETS</div>
+                            <input type="hidden" id="setting_game_preset" data-save="game_preset" value="classic">
+                            <button type="button" class="preset-btn active" data-preset="classic">Classic</button>
+                            <button type="button" class="preset-btn" data-preset="warmup">Quick Warmup</button>
+                            <button type="button" class="preset-btn" data-preset="drill">Vocabulary Drill</button>
+                            <button type="button" class="preset-btn" data-preset="raid">Boss Raid</button>
+                        </div>
+
+                        <div class="quick-start-panel">
+                            <div class="quick-start-label">🚀 QUICK START DATA</div>
+                            <button type="button" class="sample-data-btn" data-sample="animals">Animals</button>
+                            <button type="button" class="sample-data-btn" data-sample="classroom">Classroom</button>
+                            <button type="button" class="sample-data-btn" data-sample="actions">Actions</button>
+                        </div>
+
                         <div class="flex flex-col gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg shadow-inner">
                             <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Nguồn ảnh</span>
                             <div class="flex items-center gap-2 flex-wrap">
@@ -587,6 +628,11 @@
                                 <span id="uploaded-images-count" class="text-xs font-bold text-emerald-700">0 ảnh</span>
                             </div>
                             <p class="text-[11px] text-emerald-900 leading-snug">Nhập tên ảnh, URL ảnh, hoặc file trong repo images/.</p>
+                        </div>
+
+                        <div id="setup-status-card" class="setup-status-card ready">
+                            <div class="font-black text-sm">✅ Ready</div>
+                            <div id="setup-status-text" class="text-xs font-bold">0 active questions</div>
                         </div>
 
                         <div class="flex-grow"></div>
