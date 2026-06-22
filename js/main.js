@@ -395,7 +395,8 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
 
             const GAME_PRESETS = {
                 classic: { label: 'Classic', quizMode: 'sequential', bossHp: 1000, heroHp: 100, stunTime: 2, timerSeconds: 180, rewardMultiplier: 1, shopEnabled: false },
-                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true }
+                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true },
+                god: { label: 'God Mode', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 0.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true, godMode: true }
             };
 
             function safeSetText(elementId, textValue) {
@@ -637,6 +638,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     this.state.wrongPool = [];
                     this.state.isRetryPhase = false;
                     this.state.isTransitioning = false;
+                    this.applyGodModeResources();
 
                     this.buildDecks();
                     this.refreshActivePool();
@@ -647,7 +649,22 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 },
 
                 updateUI: function() {
+                    this.applyGodModeResources();
                     updateUI(this.state);
+                },
+
+                isGodMode: function() {
+                    return !!(GAME_PRESETS[this.state.preset]?.godMode);
+                },
+
+                applyGodModeResources: function() {
+                    if (!this.isGodMode()) return;
+                    ['p1', 'p2'].forEach(playerPrefix => {
+                        const player = this.state[playerPrefix];
+                        if (!player) return;
+                        player.mana = 10;
+                        player.cash = 9999;
+                    });
                 },
 
                 buildDecks: function() {
@@ -866,6 +883,11 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 },
 
                 addMana: function(playerPrefix, amount) {
+                    if (this.isGodMode()) {
+                        this.applyGodModeResources();
+                        this.updateUI();
+                        return;
+                    }
                     let player = this.state[playerPrefix];
                     let oldCapacity = Math.floor(player.mana / 5);
                     player.mana = Math.min(10, player.mana + amount);
@@ -902,6 +924,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     }
                     player.cash -= upgrade.cost;
                     upgrade.apply();
+                    this.applyGodModeResources();
                     showShopToast(`${player.name} bought ${upgrade.label}!`);
                     this.updateUI();
                 },
@@ -956,7 +979,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                         showAnswerFeedback(selectedAnswerIndex, 'Stunned! Streak reset', 'wrong');
 
                         let oldCapacity = Math.floor(player.mana / 5);
-                        player.mana = Math.max(0, player.mana - 1);
+                        if (!this.isGodMode()) player.mana = Math.max(0, player.mana - 1);
                         let newCapacity = Math.floor(player.mana / 5);
                         
                         if (newCapacity < oldCapacity && player.queue.length > newCapacity) {
@@ -996,7 +1019,8 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     
                     if (player.queue.length > 0 && player.mana >= 5) {
                         let skillToUse = player.queue.shift();
-                        player.mana -= 5;
+                        if (!this.isGodMode()) player.mana -= 5;
+                        this.applyGodModeResources();
                         this.updateUI();
 
                         // ==========================================

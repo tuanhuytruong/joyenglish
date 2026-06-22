@@ -306,10 +306,15 @@ export function triggerClickSkill(playerPrefix, skillType) {
                     return;
                 }
                 
+                const isGodMode = window.GameplayManager?.isGodMode?.() || false;
                 let cdSec = 3;
-                if (skillType === 'atk') cdSec = parseFloat(document.getElementById('setting_cd_atk')?.value) || 3;
-                if (skillType === 'def') cdSec = parseFloat(document.getElementById('setting_cd_def')?.value) || 5;
-                if (skillType === 'heal') cdSec = parseFloat(document.getElementById('setting_cd_heal')?.value) || 8;
+                if (isGodMode) {
+                    cdSec = 0.5;
+                } else {
+                    if (skillType === 'atk') cdSec = parseFloat(document.getElementById('setting_cd_atk')?.value) || 3;
+                    if (skillType === 'def') cdSec = parseFloat(document.getElementById('setting_cd_def')?.value) || 5;
+                    if (skillType === 'heal') cdSec = parseFloat(document.getElementById('setting_cd_heal')?.value) || 8;
+                }
 
                 const btnId = `btn-${caster}-${skillType}`;
                 const txtId = `cd-txt-${caster}-${skillType}`;
