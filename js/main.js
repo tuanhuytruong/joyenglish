@@ -394,10 +394,8 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
             }
 
             const GAME_PRESETS = {
-                classic: { label: 'Classic Battle', quizMode: 'sequential', bossHp: 1000, heroHp: 100, stunTime: 2, timerSeconds: 180, rewardMultiplier: 1 },
-                warmup: { label: 'Quick Warmup', quizMode: 'random', bossHp: 700, heroHp: 120, stunTime: 1.5, timerSeconds: 90, rewardMultiplier: 1.15 },
-                drill: { label: 'Vocabulary Drill', quizMode: 'sequential', bossHp: 900, heroHp: 140, stunTime: 1, timerSeconds: 240, rewardMultiplier: 1 },
-                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35 }
+                classic: { label: 'Classic', quizMode: 'sequential', bossHp: 1000, heroHp: 100, stunTime: 2, timerSeconds: 180, rewardMultiplier: 1, shopEnabled: false },
+                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true }
             };
 
             function safeSetText(elementId, textValue) {
@@ -423,6 +421,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 }
                 const hudMode = document.getElementById('hud-mode-label');
                 if (hudMode) hudMode.innerText = preset.label;
+                document.body.classList.toggle('shop-enabled', !!preset.shopEnabled);
             }
 
             const svgTick = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(34,197,94,0.8)]"><svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div>`;
@@ -594,6 +593,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     this.state.mode = document.getElementById('setting_quiz_mode')?.value || activePreset.quizMode || 'sequential';
                     const hudMode = document.getElementById('hud-mode-label');
                     if (hudMode) hudMode.innerText = activePreset.label;
+                    document.body.classList.toggle('shop-enabled', !!activePreset.shopEnabled);
                     this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || activePreset.stunTime || 2) * 1000;
                     
                     this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || 100;
@@ -860,6 +860,8 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
 
                 buyUpgrade: function(playerPrefix, upgradeId) {
                     const player = this.state[playerPrefix];
+                    const activePreset = GAME_PRESETS[this.state.preset] || GAME_PRESETS.classic;
+                    if (!activePreset.shopEnabled) return;
                     if (!player || !this.state.isPlaying) return;
                     const upgrades = {
                         mana: { cost: 20, label: '+2 Mana', apply: () => { player.mana = Math.min(10, (player.mana || 0) + 2); } },

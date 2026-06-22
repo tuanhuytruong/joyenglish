@@ -194,6 +194,16 @@ body { background-color: #0f172a; margin: 0; display: flex; align-items: center;
     font-weight: 900;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
 }
+.player-reward-strip.is-p2 {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+.player-reward-strip.is-p2 span {
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+}
 .answer-feedback-pop {
     position: fixed;
     z-index: 5000;
@@ -246,7 +256,7 @@ body { background-color: #0f172a; margin: 0; display: flex; align-items: center;
 
 
 .player-shop-panel {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -256,6 +266,9 @@ body { background-color: #0f172a; margin: 0; display: flex; align-items: center;
     background: rgba(15, 23, 42, 0.72);
     backdrop-filter: blur(8px);
     box-shadow: 0 8px 18px rgba(0,0,0,0.22), inset 0 0 12px rgba(255,255,255,0.05);
+}
+body.shop-enabled .player-shop-panel {
+    display: flex;
 }
 .shop-btn {
     min-width: 58px;
