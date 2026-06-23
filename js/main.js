@@ -388,14 +388,15 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 if(!val) return "";
                 const isUrl = val.startsWith('http') || val.startsWith('data:');
                 const tenorMatch = val.match(/tenor\.com\/view\/.*-(\d+)$/);
-                if (tenorMatch) { return `<iframe src="https://tenor.com/embed/${tenorMatch[1]}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`; } 
-                else if (isUrl) { return `<img src="${val}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';" />`; } 
-                else { return `<img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';}" class="w-full h-full object-cover pointer-events-none bg-black" />`; }
+                if (tenorMatch) { return `<div class="avatar-media-wrap"><iframe src="https://tenor.com/embed/${tenorMatch[1]}" width="100%" height="100%" frameBorder="0" scrolling="no" class="avatar-media pointer-events-none bg-black" allowtransparency="true"></iframe></div>`; } 
+                else if (isUrl) { return `<div class="avatar-media-wrap"><img src="${val}" class="avatar-media pointer-events-none bg-black" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';" /></div>`; } 
+                else { return `<div class="avatar-media-wrap"><img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';}" class="avatar-media pointer-events-none bg-black" /></div>`; }
             }
 
             const GAME_PRESETS = {
                 classic: { label: 'PvP', quizMode: 'sequential', bossHp: 100, heroHp: 100, p1Name: 'P1', p2Name: 'P2', stunTime: 2, timerSeconds: 180, rewardMultiplier: 1, shopEnabled: false },
-                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, p1Name: 'P1', p2Name: 'BOSS', stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true }
+                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, p1Name: 'P1', p2Name: 'BOSS', stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true },
+                god: { label: 'God Mode', quizMode: 'random', bossHp: 1600, heroHp: 100, p1Name: 'P1', p2Name: 'BOSS', stunTime: 0.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true, godMode: true }
             };
 
             function safeSetText(elementId, textValue) {
@@ -498,8 +499,16 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
 
                     const p1Av = document.getElementById('p1-avatar-input').value;
                     const p2Av = document.getElementById('p2-avatar-input').value;
-                    if(p1Av) { let avHtml = getAvatarHtml(p1Av); document.getElementById('p1-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p1-avatar').innerHTML = avHtml; }
-                    if(p2Av) { let avHtml = getAvatarHtml(p2Av); document.getElementById('p2-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p2-avatar').innerHTML = avHtml; }
+                    if(p1Av) {
+                        let avHtml = getAvatarHtml(p1Av);
+                        document.getElementById('p1-avatar-inner').innerHTML = avHtml.replace(/^<div class="avatar-media-wrap">|<\/div>$/g, '');
+                        document.getElementById('vs-p1-avatar').innerHTML = avHtml;
+                    }
+                    if(p2Av) {
+                        let avHtml = getAvatarHtml(p2Av);
+                        document.getElementById('p2-avatar-inner').innerHTML = avHtml.replace(/^<div class="avatar-media-wrap">|<\/div>$/g, '');
+                        document.getElementById('vs-p2-avatar').innerHTML = avHtml;
+                    }
 
                     let gridData = collectActiveGridData();
                     
