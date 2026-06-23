@@ -2,8 +2,8 @@ import { mainThemeAudio, suddenDeathAudio, winAudio, defeatedAudio } from './aud
 import { spawnFloatingIcons, fireConfetti } from './effects.js';
 
 export function saveMatchToHistory(winnerPrefix, durationStr) {
-                let p1Name = window.GameplayManager.state.p1.name || 'HERO';
-                let p2Name = window.GameplayManager.state.p2.name || 'BOSS';
+                let p1Name = window.GameplayManager.state.p1.name || 'P1';
+                let p2Name = window.GameplayManager.state.p2.name || 'P2';
                 let p1Avatar = document.getElementById('p1-avatar-inner').innerHTML;
                 let p2Avatar = document.getElementById('p2-avatar-inner').innerHTML;
 
@@ -142,7 +142,7 @@ export function saveMatchToHistory(winnerPrefix, durationStr) {
                     // Hiện Modal End Game
                     setTimeout(() => {
                         document.getElementById('endgame-modal').classList.remove('hidden');
-                        let winnerName = window.GameplayManager.state[winnerPrefix].name || (winnerPrefix === 'p1' ? 'HERO' : 'BOSS');
+                        let winnerName = window.GameplayManager.state[winnerPrefix].name || (winnerPrefix === 'p1' ? 'P1' : 'P2');
                         document.getElementById('winner-title').innerText = `${winnerName} WINS!`;
                         document.getElementById('winner-avatar').innerHTML = document.getElementById(`${winnerPrefix}-avatar-inner`).innerHTML;
                         
@@ -194,7 +194,7 @@ export function saveMatchToHistory(winnerPrefix, durationStr) {
                         Object.entries(shopCosts).forEach(([upgradeId, cost]) => {
                             const btn = document.getElementById(`shop-${p}-${upgradeId}`);
                             if (!btn) return;
-                            const disabled = !window.GameplayManager?.state?.isPlaying || (player.cash || 0) < cost;
+                            const disabled = !window.GameplayManager?.state?.isPlaying || !window.GameplayManager?.state?.shopEnabled || (player.cash || 0) < cost;
                             btn.disabled = disabled;
                             btn.classList.toggle('is-disabled', disabled);
                         });

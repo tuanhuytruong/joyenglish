@@ -184,6 +184,7 @@ body { background-color: #0f172a; margin: 0; display: flex; align-items: center;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    width: 100%;
     min-height: 28px;
     padding: 4px 10px;
     border: 1px solid;
@@ -196,6 +197,7 @@ body { background-color: #0f172a; margin: 0; display: flex; align-items: center;
 }
 .player-reward-strip.is-p2 {
     justify-content: space-between;
+    align-self: stretch;
     text-align: right;
 }
 .player-reward-strip.is-p2 span {
@@ -210,6 +212,12 @@ body { background-color: #0f172a; margin: 0; display: flex; align-items: center;
 .player-reward-strip.is-p2 span:last-child {
     justify-content: flex-end;
     text-align: right;
+}
+.player-reward-strip.is-p2 .reward-cash {
+    margin-right: auto;
+}
+.player-reward-strip.is-p2 .reward-streak {
+    margin-left: auto;
 }
 .answer-feedback-pop {
     position: fixed;
@@ -382,6 +390,30 @@ body.shop-enabled .player-shop-panel {
     background: linear-gradient(135deg, #fde68a, #fbbf24);
     box-shadow: 0 0 12px rgba(250, 204, 21, 0.45);
 }
+.shop-toggle-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 2px solid #fbbf24;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 1000;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.shop-toggle-chip input {
+    width: 16px;
+    height: 16px;
+    accent-color: #f59e0b;
+}
+.shop-toggle-chip:has(input:checked) {
+    background: linear-gradient(135deg, #fef3c7, #f59e0b);
+    color: #451a03;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+}
 
 
 .quick-start-panel {
@@ -490,6 +522,7 @@ body.shop-enabled .player-shop-panel {
 .preset-panel,
 .quick-start-panel {
     min-height: 44px;
+    flex-wrap: wrap;
 }
 .preset-label,
 .quick-start-label {

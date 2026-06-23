@@ -394,14 +394,24 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
             }
 
             const GAME_PRESETS = {
-                classic: { label: 'Classic', quizMode: 'sequential', bossHp: 1000, heroHp: 100, stunTime: 2, timerSeconds: 180, rewardMultiplier: 1, shopEnabled: false },
-                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true },
-                god: { label: 'God Mode', quizMode: 'random', bossHp: 1600, heroHp: 100, stunTime: 0.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true, godMode: true }
+                classic: { label: 'PvP', quizMode: 'sequential', bossHp: 100, heroHp: 100, p1Name: 'P1', p2Name: 'P2', stunTime: 2, timerSeconds: 180, rewardMultiplier: 1, shopEnabled: false },
+                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, p1Name: 'P1', p2Name: 'BOSS', stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true }
             };
 
             function safeSetText(elementId, textValue) {
                 const el = document.getElementById(elementId);
                 if (el && textValue) el.innerText = textValue;
+            }
+
+            function isShopEnabledForCurrentSettings() {
+                const shopToggle = document.getElementById('setting_shop_enabled');
+                if (shopToggle) return !!shopToggle.checked;
+                const preset = GAME_PRESETS[document.getElementById('setting_game_preset')?.value || 'classic'] || GAME_PRESETS.classic;
+                return !!preset.shopEnabled;
+            }
+
+            function updateShopEnabledUI(isEnabled = isShopEnabledForCurrentSettings()) {
+                document.body.classList.toggle('shop-enabled', !!isEnabled);
             }
 
             function syncShopKeyHints() {
@@ -430,14 +440,20 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     const bossHp = document.getElementById('boss-max-hp');
                     const heroHp = document.getElementById('hero-max-hp');
                     const stunTime = document.getElementById('setting_stun_time');
+                    const shopToggle = document.getElementById('setting_shop_enabled');
+                    const p1NameInput = document.getElementById('p1-name-input');
+                    const p2NameInput = document.getElementById('p2-name-input');
                     if (quizMode) quizMode.value = preset.quizMode;
                     if (bossHp) bossHp.value = preset.bossHp;
                     if (heroHp) heroHp.value = preset.heroHp;
                     if (stunTime) stunTime.value = preset.stunTime;
+                    if (shopToggle) shopToggle.checked = !!preset.shopEnabled;
+                    if (p1NameInput) p1NameInput.value = preset.p1Name || 'P1';
+                    if (p2NameInput) p2NameInput.value = preset.p2Name || 'P2';
                 }
                 const hudMode = document.getElementById('hud-mode-label');
                 if (hudMode) hudMode.innerText = preset.label;
-                document.body.classList.toggle('shop-enabled', !!preset.shopEnabled);
+                updateShopEnabledUI();
             }
 
             const svgTick = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(34,197,94,0.8)]"><svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div>`;
@@ -449,6 +465,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
             document.querySelectorAll('[data-save^="key_"]').forEach(inp => {
                 inp.addEventListener('change', syncShopKeyHints);
             });
+            document.getElementById('setting_shop_enabled')?.addEventListener('change', () => updateShopEnabledUI());
 
             document.getElementById('save-and-close-btn').addEventListener('click', function() {
                 try {
@@ -561,8 +578,9 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     }
                 }, MAIN_THEME_DELAY_MS);
 
-                window.GameplayManager.state.p1.name = document.getElementById('p1-name-input').value || 'HERO';
-                window.GameplayManager.state.p2.name = document.getElementById('p2-name-input').value || 'BOSS';
+                const activePreset = GAME_PRESETS[window.GameplayManager.state.preset] || GAME_PRESETS.classic;
+                window.GameplayManager.state.p1.name = document.getElementById('p1-name-input').value || activePreset.p1Name || 'P1';
+                window.GameplayManager.state.p2.name = document.getElementById('p2-name-input').value || activePreset.p2Name || 'P2';
                 
                 document.getElementById('p1-name-input').dispatchEvent(new Event('change'));
                 document.getElementById('p2-name-input').dispatchEvent(new Event('change'));
@@ -582,6 +600,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     }
                 });
                 applyPreset(document.getElementById('setting_game_preset')?.value || 'classic', { updateInputs: false });
+                updateShopEnabledUI();
             } else {
                 applyPreset('classic');
             }
@@ -620,11 +639,12 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     this.state.mode = document.getElementById('setting_quiz_mode')?.value || activePreset.quizMode || 'sequential';
                     const hudMode = document.getElementById('hud-mode-label');
                     if (hudMode) hudMode.innerText = activePreset.label;
-                    document.body.classList.toggle('shop-enabled', !!activePreset.shopEnabled);
+                    this.state.shopEnabled = isShopEnabledForCurrentSettings();
+                    updateShopEnabledUI(this.state.shopEnabled);
                     this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || activePreset.stunTime || 2) * 1000;
                     
-                    this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || 100;
-                    this.state.p2.maxHp = this.state.p2.hp = parseInt(document.getElementById('boss-max-hp')?.value) || 1000;
+                    this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || activePreset.heroHp || 100;
+                    this.state.p2.maxHp = this.state.p2.hp = parseInt(document.getElementById('boss-max-hp')?.value) || activePreset.bossHp || 100;
                     this.state.p1.mana = 0; this.state.p2.mana = 0;
                     this.state.p1.cash = 0; this.state.p2.cash = 0;
                     this.state.p1.streak = 0; this.state.p2.streak = 0;
@@ -902,14 +922,20 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                                 playSound('draw_skill');
                             }
                         }
+                    } else if (player.mana >= 5 && player.queue.length === 0) {
+                        let drawnSkill = this.drawSkill(playerPrefix);
+                        player.queue.push(drawnSkill);
+                        playSound('draw_skill');
                     }
                     this.updateUI();
                 },
 
                 buyUpgrade: function(playerPrefix, upgradeId) {
                     const player = this.state[playerPrefix];
-                    const activePreset = GAME_PRESETS[this.state.preset] || GAME_PRESETS.classic;
-                    if (!activePreset.shopEnabled) return;
+                    if (!this.state.shopEnabled) {
+                        showShopToast('Shop is disabled for this match', 'warning');
+                        return;
+                    }
                     if (!player || !this.state.isPlaying) return;
                     const upgrades = {
                         mana: { cost: 20, label: '+2 Mana', apply: () => { player.mana = Math.min(10, (player.mana || 0) + 2); } },
@@ -1020,6 +1046,11 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     if (player.queue.length > 0 && player.mana >= 5) {
                         let skillToUse = player.queue.shift();
                         if (!this.isGodMode()) player.mana -= 5;
+                        if (!this.isGodMode() && player.mana >= 5 && player.queue.length === 0) {
+                            const drawnSkill = this.drawSkill(playerPrefix);
+                            player.queue.push(drawnSkill);
+                            playSound('draw_skill');
+                        }
                         this.applyGodModeResources();
                         this.updateUI();
 
