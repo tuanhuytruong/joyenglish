@@ -634,11 +634,16 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 state: gameState,
                 suddenDeathTimer: null,
                 SKILL_POOL: [
-                    { id: 'atk', icon: '⚔️' },
-                    { id: 'def', icon: '🛡️' },
-                    { id: 'heal', icon: '➕' },
-                    { id: 'meteor', icon: '☄️' },
-                    { id: 'kamehameha', icon: '🌊' }
+                    { id: 'copycat', icon: '👁️', ownerKey: 'skill_1_owner' },
+                    { id: 'shuriken', icon: '🥷', ownerKey: 'skill_2_owner' },
+                    { id: 'meteor', icon: '☄️', ownerKey: 'skill_3_owner' },
+                    { id: 'thunder', icon: '⚡', ownerKey: 'skill_4_owner' },
+                    { id: 'junk', icon: '🍔', ownerKey: 'skill_5_owner' },
+                    { id: 'freeze', icon: '❄️', ownerKey: 'skill_6_owner' },
+                    { id: 'mirror', icon: '🛡️', ownerKey: 'skill_7_owner' },
+                    { id: 'rest', icon: '💤', ownerKey: 'skill_8_owner' },
+                    { id: 'fireball', icon: '🔥', ownerKey: 'skill_9_owner' },
+                    { id: 'kamehameha', icon: '🌊', ownerKey: 'skill_10_owner' }
                 ],
 
                 initGame: function(settingsData, gridData) {
@@ -700,8 +705,17 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     });
                 },
 
-                shuffleSkillPool: function() {
-                    const deck = [...this.SKILL_POOL];
+                getAvailableSkillPool: function(playerPrefix) {
+                    const fallback = this.SKILL_POOL.filter(skill => skill.id === 'meteor' || skill.id === 'kamehameha');
+                    const pool = this.SKILL_POOL.filter(skill => {
+                        const owner = document.querySelector(`[data-save="${skill.ownerKey}"]`)?.value || 'both';
+                        return owner === 'both' || owner === playerPrefix;
+                    });
+                    return pool.length > 0 ? pool : fallback;
+                },
+
+                shuffleSkillPool: function(playerPrefix) {
+                    const deck = [...this.getAvailableSkillPool(playerPrefix)];
                     for (let i = deck.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -710,15 +724,15 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 },
 
                 buildDecks: function() {
-                    // Skill deck is a shuffled bag: use every skill once before recycling.
-                    this.state.p1.deck = this.shuffleSkillPool();
-                    this.state.p2.deck = this.shuffleSkillPool();
+                    // Ultimate deck mirrors the Skills tab: shuffle eligible skills, then consume sequentially before recycling.
+                    this.state.p1.deck = this.shuffleSkillPool('p1');
+                    this.state.p2.deck = this.shuffleSkillPool('p2');
                 },
 
                 drawSkill: function(playerPrefix) {
                     let player = this.state[playerPrefix];
                     if (player.deck.length === 0) {
-                        player.deck = this.shuffleSkillPool();
+                        player.deck = this.shuffleSkillPool(playerPrefix);
                     }
                     return player.deck.shift();
                 },
@@ -1060,6 +1074,59 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     }
                 },
 
+                castUltimateSkill: function(skillToUse, playerPrefix, opponentPrefix) {
+                    const targetBox = document.getElementById(`${opponentPrefix}-avatar-box`);
+                    const casterBox = document.getElementById(`${playerPrefix}-avatar-box`);
+                    if (!skillToUse) return;
+                    this.state[playerPrefix].lastUltimateSkillId = skillToUse.id;
+
+                    if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); }
+                    else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
+                    else if (skillToUse.id === 'shuriken') {
+                        const hits = parseInt(document.querySelector('[data-save="skill_2_multi"]')?.value) || 3;
+                        for (let i = 0; i < hits; i++) setTimeout(() => { playWeaponBarrage(playerPrefix, opponentPrefix); }, i * 120);
+                    }
+                    else if (skillToUse.id === 'thunder') {
+                        const dmg = parseFloat(document.querySelector('[data-save="skill_4_dmg"]')?.value) || 20;
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_4_time"]')?.value) || 3;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'stun', seconds * 1000, true);
+                        window.takeDamage(opponentPrefix, dmg);
+                    }
+                    else if (skillToUse.id === 'junk') {
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_5_time"]')?.value) || 5;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'poison', seconds * 1000, false);
+                    }
+                    else if (skillToUse.id === 'freeze') {
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_6_time"]')?.value) || 4;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'freeze', seconds * 1000, true);
+                    }
+                    else if (skillToUse.id === 'mirror') {
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_7_time"]')?.value) || 5;
+                        triggerStatusEffect(casterBox, playerPrefix, 'reflect', seconds * 1000, false);
+                        this.state[playerPrefix].reflectUntil = Date.now() + seconds * 1000;
+                    }
+                    else if (skillToUse.id === 'rest') {
+                        const shield = parseFloat(document.querySelector('[data-save="skill_8_shield"]')?.value) || 100;
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_8_time"]')?.value) || 5;
+                        this.state[playerPrefix].shield = Math.min((this.state[playerPrefix].shield || 0) + shield, shield);
+                        triggerStatusEffect(casterBox, playerPrefix, 'freeze', seconds * 1000, false);
+                        this.updateUI();
+                    }
+                    else if (skillToUse.id === 'fireball') {
+                        const dmg = parseFloat(document.querySelector('[data-save="skill_9_dmg"]')?.value) || 100;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'burn', 1200, true);
+                        window.takeDamage(opponentPrefix, dmg);
+                    }
+                    else if (skillToUse.id === 'copycat') {
+                        const copied = this.state[opponentPrefix].lastUltimateSkillId;
+                        if (copied && copied !== 'copycat') {
+                            this.castUltimateSkill({ id: copied }, playerPrefix, opponentPrefix);
+                        } else {
+                            playMeteorShower(playerPrefix, opponentPrefix);
+                        }
+                    }
+                },
+
                 handleSkill: function(playerPrefix) {
                     if (!this.state.isPlaying) return;
                     let player = this.state[playerPrefix];
@@ -1083,9 +1150,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                         // ⚓ [NEO 4]: GỌI TÊN SKILL (KÍCH HOẠT)
                         // Khi có skill mới, thêm 1 dòng "else if" ở đây:
                         // ==========================================
-                        if (skillToUse.id === 'atk' || skillToUse.id === 'def' || skillToUse.id === 'heal') { useBasicSkill(playerPrefix, skillToUse.id, { bypassCooldown: true }); }
-                        else if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); } 
-                        else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
+                        this.castUltimateSkill(skillToUse, playerPrefix, opponentPrefix);
                         // ✂️👇 THÊM ELSE IF CHO SKILL MỚI VÀO ĐÂY 👇✂️
 
                         // ==========================================
