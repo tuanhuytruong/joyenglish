@@ -634,6 +634,9 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                 state: gameState,
                 suddenDeathTimer: null,
                 SKILL_POOL: [
+                    { id: 'atk', icon: '⚔️' },
+                    { id: 'def', icon: '🛡️' },
+                    { id: 'heal', icon: '➕' },
                     { id: 'meteor', icon: '☄️' },
                     { id: 'kamehameha', icon: '🌊' }
                 ],
@@ -663,13 +666,13 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     this.state.p1.isStunned = false; this.state.p2.isStunned = false;
                     this.state.p1.isFrozen = false; this.state.p2.isFrozen = false;
                     this.state.p1.queue = []; this.state.p2.queue = [];
+                    this.state.p1.lastUltimateAt = 0; this.state.p2.lastUltimateAt = 0;
                     
                     this.state.wrongPool = [];
                     this.state.isRetryPhase = false;
                     this.state.isTransitioning = false;
-                    this.applyGodModeResources();
-
                     this.buildDecks();
+                    this.applyGodModeResources();
                     this.refreshActivePool();
                     this.updateUI();
                     
@@ -693,22 +696,45 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                         if (!player) return;
                         player.mana = 10;
                         player.cash = 9999;
+                        this.ensureUltimateQueue(playerPrefix);
                     });
                 },
 
+                shuffleSkillPool: function() {
+                    const deck = [...this.SKILL_POOL];
+                    for (let i = deck.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [deck[i], deck[j]] = [deck[j], deck[i]];
+                    }
+                    return deck;
+                },
+
                 buildDecks: function() {
-                    // Logic xào bài vào Giỏ (Deck)
-                    this.state.p1.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
-                    this.state.p2.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                    // Skill deck is a shuffled bag: use every skill once before recycling.
+                    this.state.p1.deck = this.shuffleSkillPool();
+                    this.state.p2.deck = this.shuffleSkillPool();
                 },
 
                 drawSkill: function(playerPrefix) {
                     let player = this.state[playerPrefix];
-                    // Nếu rút hết bài thì nạp lại và xáo lên
                     if (player.deck.length === 0) {
-                        player.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                        player.deck = this.shuffleSkillPool();
                     }
                     return player.deck.shift();
+                },
+
+                ensureUltimateQueue: function(playerPrefix) {
+                    const player = this.state[playerPrefix];
+                    if (!player) return;
+                    const targetSlots = Math.min(2, Math.floor((player.mana || 0) / 5));
+                    while (player.queue.length < targetSlots) {
+                        const drawnSkill = this.drawSkill(playerPrefix);
+                        if (!drawnSkill) break;
+                        player.queue.push(drawnSkill);
+                    }
+                    if (player.queue.length > targetSlots) {
+                        player.queue = player.queue.slice(0, targetSlots);
+                    }
                 },
 
                 startGame: function() {
@@ -922,20 +948,9 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     player.mana = Math.min(10, player.mana + amount);
                     let newCapacity = Math.floor(player.mana / 5);
 
-                    if (newCapacity > oldCapacity) {
-                        let skillsToDraw = newCapacity - oldCapacity;
-                        for(let i=0; i<skillsToDraw; i++) {
-                            if (player.queue.length < 2) {
-                                let drawnSkill = this.drawSkill(playerPrefix);
-                                player.queue.push(drawnSkill);
-                                playSound('draw_skill');
-                            }
-                        }
-                    } else if (player.mana >= 5 && player.queue.length === 0) {
-                        let drawnSkill = this.drawSkill(playerPrefix);
-                        player.queue.push(drawnSkill);
-                        playSound('draw_skill');
-                    }
+                    const beforeQueue = player.queue.length;
+                    this.ensureUltimateQueue(playerPrefix);
+                    if (player.queue.length > beforeQueue) playSound('draw_skill');
                     this.updateUI();
                 },
 
@@ -947,7 +962,7 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     }
                     if (!player || !this.state.isPlaying) return;
                     const upgrades = {
-                        mana: { cost: 20, label: '+2 Mana', apply: () => { player.mana = Math.min(10, (player.mana || 0) + 2); } },
+                        mana: { cost: 20, label: '+2 Mana', apply: () => { this.addMana(playerPrefix, 2); } },
                         shield: { cost: 30, label: '+25 Shield', apply: () => { player.shield = Math.min(99, (player.shield || 0) + 25); } },
                         double: { cost: 40, label: '2x Cash x3', apply: () => { player.multiplier = 2; player.multiplierTurns = 3; } }
                     };
@@ -1053,13 +1068,14 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     if (player.isFrozen) { playSound('freeze'); return; }
                     
                     if (player.queue.length > 0 && player.mana >= 5) {
+                        const now = Date.now();
+                        const ultCooldownMs = this.isGodMode() ? 500 : 0;
+                        if (ultCooldownMs && player.lastUltimateAt && now - player.lastUltimateAt < ultCooldownMs) return;
+
                         let skillToUse = player.queue.shift();
                         if (!this.isGodMode()) player.mana -= 5;
-                        if (!this.isGodMode() && player.mana >= 5 && player.queue.length === 0) {
-                            const drawnSkill = this.drawSkill(playerPrefix);
-                            player.queue.push(drawnSkill);
-                            playSound('draw_skill');
-                        }
+                        player.lastUltimateAt = now;
+                        this.ensureUltimateQueue(playerPrefix);
                         this.applyGodModeResources();
                         this.updateUI();
 
@@ -1067,7 +1083,8 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                         // ⚓ [NEO 4]: GỌI TÊN SKILL (KÍCH HOẠT)
                         // Khi có skill mới, thêm 1 dòng "else if" ở đây:
                         // ==========================================
-                        if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); } 
+                        if (skillToUse.id === 'atk' || skillToUse.id === 'def' || skillToUse.id === 'heal') { useBasicSkill(playerPrefix, skillToUse.id, { bypassCooldown: true }); }
+                        else if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); } 
                         else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
                         // ✂️👇 THÊM ELSE IF CHO SKILL MỚI VÀO ĐÂY 👇✂️
 

@@ -297,7 +297,7 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 return true; 
             };
 
-            export function useBasicSkill(caster, skillType) {
+            export function useBasicSkill(caster, skillType, options = {}) {
                 if (!window.GameplayManager || !window.GameplayManager.state.isPlaying) return;
                 
                 let state = window.GameplayManager.state[caster];
@@ -319,7 +319,7 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 const btnId = `btn-${caster}-${skillType}`;
                 const txtId = `cd-txt-${caster}-${skillType}`;
 
-                if (window.triggerCooldownUI(btnId, txtId, cdSec)) {
+                if (options.bypassCooldown || window.triggerCooldownUI(btnId, txtId, cdSec)) {
                     let target = caster === 'p1' ? 'p2' : 'p1';
                     
                     if (skillType === 'atk') {
