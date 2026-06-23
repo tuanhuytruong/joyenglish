@@ -59,8 +59,8 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 const targetAvatar = document.getElementById(`${targetPrefix}-avatar-box`);
                 if (!targetAvatar) return;
 
-                const totalMeteors = 15;
-                const fastInterval = 80; 
+                const totalMeteors = 8;
+                const fastInterval = 90; 
                 
                 // 1. Thả 14 viên nhỏ liên tục
                 for (let i = 0; i < totalMeteors - 1; i++) {
@@ -138,11 +138,10 @@ export function triggerClickSkill(playerPrefix, skillType) {
                         playSound('epic_explosion'); 
                         triggerStatusEffect(targetElement, targetPrefix, 'burn', 4000, true); 
                         spawnFloatingIcons(targetElement, ['🪨', '⛰️', '💥', '💨'], 15, 1500, 1, 2.5, 120);
-                        // Deal burst damage for the giant one
-                        window.takeDamage(targetPrefix, dmg * 5);
+                        // Batch most meteor damage into the giant hit to avoid many UI updates.
+                        window.takeDamage(targetPrefix, dmg * 12);
                     } else {
-                        triggerStatusEffect(targetElement, targetPrefix, 'burn', 300, false); 
-                        window.takeDamage(targetPrefix, dmg);
+                        triggerStatusEffect(targetElement, targetPrefix, 'burn', 180, false);
                     }
                 };
             }

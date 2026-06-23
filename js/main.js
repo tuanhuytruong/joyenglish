@@ -1083,8 +1083,10 @@ window.triggerClickShop = function(playerPrefix, upgradeId) {
                     if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); }
                     else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
                     else if (skillToUse.id === 'shuriken') {
-                        const hits = parseInt(document.querySelector('[data-save="skill_2_multi"]')?.value) || 3;
-                        for (let i = 0; i < hits; i++) setTimeout(() => { playWeaponBarrage(playerPrefix, opponentPrefix); }, i * 120);
+                        const hits = Math.min(parseInt(document.querySelector('[data-save="skill_2_multi"]')?.value) || 3, 5);
+                        const dmgPerHit = parseFloat(document.getElementById(playerPrefix === 'p1' ? 'hero-mana-atk' : 'boss-mana-atk')?.value) || 10;
+                        spawnFloatingIcons(targetBox, ['🥷', '✦', '✧'], hits, 700, 0.7, 1.5, 90);
+                        window.takeDamage(opponentPrefix, dmgPerHit * hits);
                     }
                     else if (skillToUse.id === 'thunder') {
                         const dmg = parseFloat(document.querySelector('[data-save="skill_4_dmg"]')?.value) || 20;
