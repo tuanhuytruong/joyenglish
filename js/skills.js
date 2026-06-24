@@ -174,14 +174,14 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 }
 
                 // =========================================================================
-                const CHARGE_TIME = 2800; 
-                const BEAM_DURATION = 1800; 
-                const GIF_STAY_TIME = 1200; 
+                const CHARGE_TIME = 1600; 
+                const BEAM_DURATION = 900;
+                const GIF_STAY_TIME = 700;
                 
                 const GIF_OFFSET_X = 0;
                 const GIF_OFFSET_Y = 0; 
 
-                const LASER_HEIGHT = 54; 
+                const LASER_HEIGHT = 42; 
                 const LASER_OFFSET_X = isP1 ? 30 : -30; 
                 const LASER_OFFSET_Y = 0; 
                 // =========================================================================
@@ -222,7 +222,8 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 setTimeout(() => {
                     if (!isRealAudioWorking) playSound('kame_blast'); 
                     
-                    triggerStatusEffect(attackerAvatar, attackerPrefix, '', 0, true);
+                    // Avoid full-screen shake here; it was the main Kamehameha jank source.
+                    triggerStatusEffect(attackerAvatar, attackerPrefix, '', 0, false);
 
                     const beam = document.createElement('div');
                     beam.className = 'kamehameha-beam';
@@ -245,8 +246,8 @@ export function triggerClickSkill(playerPrefix, skillType) {
                     setTimeout(() => {
                         triggerStatusEffect(targetAvatar, targetPrefix, 'burn', 3000, true);
                         targetAvatar.animate([
-                            { transform: 'translate(-10px, 0)' }, { transform: 'translate(10px, 0)' }
-                        ], { duration: 50, iterations: 20 });
+                            { transform: 'translate(-6px, 0)' }, { transform: 'translate(6px, 0)' }
+                        ], { duration: 45, iterations: 8 });
                         
                         // --- THÊM TAKE DAMAGE Ở ĐÂY ---
                         let dmg = parseFloat(document.querySelector('[data-save="skill_10_dmg"]')?.value) || 120;
