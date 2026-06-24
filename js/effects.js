@@ -16,6 +16,7 @@ import { playSound } from './audio.js';
             };
 
             export function spawnFloatingText(targetElement, text, amount, duration, startScale = 1, endScale = 1.5, offsetRange = 60, specificColor = null) {
+                amount = Math.min(amount, 2);
                 const rect = targetElement.getBoundingClientRect();
                 const targetX = rect.left + rect.width / 2 + window.scrollX;
                 const targetY = rect.top + rect.height / 2 + window.scrollY;
@@ -81,7 +82,7 @@ import { playSound } from './audio.js';
                 if (hitHP) {
                     playSound('hp_hit');
                     targetAvatarInner.animate([{ transform: 'translate(0, 0)' }, { transform: 'translate(-5px, 5px)' }, { transform: 'translate(5px, -5px)' }, { transform: 'translate(0, 0)' }], { duration: 150 });
-                    spawnFloatingIcons(targetAvatarBox, ['😭', '😢', '😰', '💢'], 3, 1500, 0.5, 2.5, 150);
+                    spawnFloatingIcons(targetAvatarBox, ['😭', '😢', '😰', '💢'], 1, 900, 0.5, 1.8, 100);
                     window.spawnFloatingText(targetAvatarBox, `-${Math.round(dmg)}`, 1, 1000, 1.5, 0.5, 60, '#e74c3c');
                 }
 
@@ -155,7 +156,8 @@ import { playSound } from './audio.js';
                 const isAnimal = weaponData.type === 'animal';
                 const isMovingRight = startX < targetCenterX;
 
-                for (let i = 0; i < 8; i++) {
+                const PROJECTILE_COUNT = 4;
+                for (let i = 0; i < PROJECTILE_COUNT; i++) {
                     setTimeout(() => {
                         playSound('bow_shoot'); 
                         let finalTargetX, finalTargetY;
@@ -206,7 +208,7 @@ import { playSound } from './audio.js';
                         anim.onfinish = () => {
                             projectile.remove();
                             let atkDmg = parseFloat(document.getElementById(attacker === 'p1' ? 'hero-mana-atk' : 'boss-mana-atk')?.value) || 10;
-                            let dmgPerHit = atkDmg / 8; 
+                            let dmgPerHit = atkDmg / PROJECTILE_COUNT; 
                             const result = window.takeDamage(target, dmgPerHit); 
                             
                             if (result.hitShield) {
@@ -219,6 +221,7 @@ import { playSound } from './audio.js';
 
 
             export function spawnFloatingIcons(targetElement, itemsArray, amount, duration, startScale = 1, endScale = 1.5, offsetRange = 60) {
+                amount = Math.min(amount, 6);
                 const rect = targetElement.getBoundingClientRect();
                 const targetX = rect.left + rect.width / 2 + window.scrollX;
                 const targetY = rect.top + rect.height / 2 + window.scrollY;

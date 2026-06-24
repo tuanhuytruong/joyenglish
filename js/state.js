@@ -5,6 +5,8 @@ export const gameState = {
                     isPlaying: false,
                     isTransitioning: false,
                     mode: 'sequential',
+                    preset: 'classic',
+                    shopEnabled: false,
                     stunTime: 2000,
                     dataPool: [],
                     activePool: [],
@@ -16,6 +18,6 @@ export const gameState = {
                     questionsPassed: 0,
                     matchStartTime: 0,
                     isSuddenDeath: false,
-                    p1: { name: 'HERO', hp: 100, maxHp: 100, mana: 0, shield: 0, isStunned: false, isFrozen: false, deck: [], queue: [] },
-                    p2: { name: 'BOSS', hp: 1000, maxHp: 1000, mana: 0, shield: 0, isStunned: false, isFrozen: false, deck: [], queue: [] }
+                    p1: { name: 'P1', hp: 100, maxHp: 100, mana: 0, shield: 0, cash: 0, streak: 0, bestStreak: 0, multiplier: 1, multiplierTurns: 0, isStunned: false, isFrozen: false, deck: [], queue: [] },
+                    p2: { name: 'P2', hp: 100, maxHp: 100, mana: 0, shield: 0, cash: 0, streak: 0, bestStreak: 0, multiplier: 1, multiplierTurns: 0, isStunned: false, isFrozen: false, deck: [], queue: [] }
                 };

@@ -59,8 +59,8 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 const targetAvatar = document.getElementById(`${targetPrefix}-avatar-box`);
                 if (!targetAvatar) return;
 
-                const totalMeteors = 15;
-                const fastInterval = 80; 
+                const totalMeteors = 8;
+                const fastInterval = 90; 
                 
                 // 1. Thả 14 viên nhỏ liên tục
                 for (let i = 0; i < totalMeteors - 1; i++) {
@@ -138,11 +138,10 @@ export function triggerClickSkill(playerPrefix, skillType) {
                         playSound('epic_explosion'); 
                         triggerStatusEffect(targetElement, targetPrefix, 'burn', 4000, true); 
                         spawnFloatingIcons(targetElement, ['🪨', '⛰️', '💥', '💨'], 15, 1500, 1, 2.5, 120);
-                        // Deal burst damage for the giant one
-                        window.takeDamage(targetPrefix, dmg * 5);
+                        // Batch most meteor damage into the giant hit to avoid many UI updates.
+                        window.takeDamage(targetPrefix, dmg * 12);
                     } else {
-                        triggerStatusEffect(targetElement, targetPrefix, 'burn', 300, false); 
-                        window.takeDamage(targetPrefix, dmg);
+                        triggerStatusEffect(targetElement, targetPrefix, 'burn', 180, false);
                     }
                 };
             }
@@ -175,14 +174,14 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 }
 
                 // =========================================================================
-                const CHARGE_TIME = 2800; 
-                const BEAM_DURATION = 1800; 
-                const GIF_STAY_TIME = 1200; 
+                const CHARGE_TIME = 1600; 
+                const BEAM_DURATION = 900;
+                const GIF_STAY_TIME = 700;
                 
                 const GIF_OFFSET_X = 0;
                 const GIF_OFFSET_Y = 0; 
 
-                const LASER_HEIGHT = 54; 
+                const LASER_HEIGHT = 42; 
                 const LASER_OFFSET_X = isP1 ? 30 : -30; 
                 const LASER_OFFSET_Y = 0; 
                 // =========================================================================
@@ -223,7 +222,8 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 setTimeout(() => {
                     if (!isRealAudioWorking) playSound('kame_blast'); 
                     
-                    triggerStatusEffect(attackerAvatar, attackerPrefix, '', 0, true);
+                    // Avoid full-screen shake here; it was the main Kamehameha jank source.
+                    triggerStatusEffect(attackerAvatar, attackerPrefix, '', 0, false);
 
                     const beam = document.createElement('div');
                     beam.className = 'kamehameha-beam';
@@ -246,8 +246,8 @@ export function triggerClickSkill(playerPrefix, skillType) {
                     setTimeout(() => {
                         triggerStatusEffect(targetAvatar, targetPrefix, 'burn', 3000, true);
                         targetAvatar.animate([
-                            { transform: 'translate(-10px, 0)' }, { transform: 'translate(10px, 0)' }
-                        ], { duration: 50, iterations: 20 });
+                            { transform: 'translate(-6px, 0)' }, { transform: 'translate(6px, 0)' }
+                        ], { duration: 45, iterations: 8 });
                         
                         // --- THÊM TAKE DAMAGE Ở ĐÂY ---
                         let dmg = parseFloat(document.querySelector('[data-save="skill_10_dmg"]')?.value) || 120;
@@ -297,7 +297,7 @@ export function triggerClickSkill(playerPrefix, skillType) {
                 return true; 
             };
 
-            export function useBasicSkill(caster, skillType) {
+            export function useBasicSkill(caster, skillType, options = {}) {
                 if (!window.GameplayManager || !window.GameplayManager.state.isPlaying) return;
                 
                 let state = window.GameplayManager.state[caster];
@@ -306,15 +306,20 @@ export function triggerClickSkill(playerPrefix, skillType) {
                     return;
                 }
                 
+                const isGodMode = window.GameplayManager?.isGodMode?.() || false;
                 let cdSec = 3;
-                if (skillType === 'atk') cdSec = parseFloat(document.getElementById('setting_cd_atk')?.value) || 3;
-                if (skillType === 'def') cdSec = parseFloat(document.getElementById('setting_cd_def')?.value) || 5;
-                if (skillType === 'heal') cdSec = parseFloat(document.getElementById('setting_cd_heal')?.value) || 8;
+                if (isGodMode) {
+                    cdSec = 0.5;
+                } else {
+                    if (skillType === 'atk') cdSec = parseFloat(document.getElementById('setting_cd_atk')?.value) || 3;
+                    if (skillType === 'def') cdSec = parseFloat(document.getElementById('setting_cd_def')?.value) || 5;
+                    if (skillType === 'heal') cdSec = parseFloat(document.getElementById('setting_cd_heal')?.value) || 8;
+                }
 
                 const btnId = `btn-${caster}-${skillType}`;
                 const txtId = `cd-txt-${caster}-${skillType}`;
 
-                if (window.triggerCooldownUI(btnId, txtId, cdSec)) {
+                if (options.bypassCooldown || window.triggerCooldownUI(btnId, txtId, cdSec)) {
                     let target = caster === 'p1' ? 'p2' : 'p1';
                     
                     if (skillType === 'atk') {

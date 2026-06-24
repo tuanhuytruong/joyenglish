@@ -17,6 +17,13 @@ window.triggerEndGame = triggerEndGame;
 window.applyHealOverTime = applyHealOverTime;
 window.triggerCooldownUI = triggerCooldownUI;
 window.useBasicSkill = useBasicSkill;
+window.triggerClickShop = function(playerPrefix, upgradeId) {
+    if (!window.GameplayManager || typeof window.GameplayManager.buyUpgrade !== 'function') {
+        console.warn('Shop is not ready yet');
+        return;
+    }
+    window.GameplayManager.buyUpgrade(playerPrefix, upgradeId);
+};
 
         window.triggerClickAnswer = function(playerPrefix, index) {
             if (window.GameplayManager) {
@@ -149,6 +156,93 @@ window.useBasicSkill = useBasicSkill;
                 if (uploadedCount) uploadedCount.textContent = `${getUploadedImageCount()} ảnh`;
             }
 
+            function collectActiveGridData() {
+                const rows = [];
+                for (let r = 1; r <= currentRowCount; r++) {
+                    const colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value?.trim();
+                    const colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value?.trim();
+                    const active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
+                    if (colA && colB && active) rows.push({ cotA: colA, cotB: colB, active });
+                }
+                return rows;
+            }
+
+            function updateSetupStatus() {
+                const card = document.getElementById('setup-status-card');
+                const text = document.getElementById('setup-status-text');
+                if (!card || !text) return;
+                const rows = collectActiveGridData();
+                const uniqueAnswers = new Set(rows.map(row => row.cotB));
+                card.classList.remove('ready', 'warning', 'error');
+                if (rows.length === 0) {
+                    card.classList.add('error');
+                    card.firstElementChild.textContent = '⚠️ Chưa có data';
+                    text.textContent = 'Cần ít nhất 4 dòng active';
+                } else if (rows.length < 4 || uniqueAnswers.size < 4) {
+                    card.classList.add('warning');
+                    card.firstElementChild.textContent = '⚠️ Cần thêm đáp án';
+                    text.textContent = `${rows.length} câu, ${uniqueAnswers.size} đáp án khác nhau`;
+                } else {
+                    card.classList.add('ready');
+                    card.firstElementChild.textContent = '✅ Sẵn sàng';
+                    text.textContent = `${rows.length} câu active, ${uniqueAnswers.size} đáp án`;
+                }
+            }
+
+            function showAnswerFeedback(answerIndex, message, type) {
+                const card = document.querySelectorAll('#answers-container > div')[answerIndex];
+                if (!card) return;
+                const rect = card.getBoundingClientRect();
+                const pop = document.createElement('div');
+                pop.className = `answer-feedback-pop ${type}`;
+                pop.textContent = message;
+                pop.style.left = `${rect.left + rect.width / 2}px`;
+                pop.style.top = `${rect.top + rect.height / 2}px`;
+                document.body.appendChild(pop);
+                setTimeout(() => pop.remove(), 1200);
+            }
+
+            function showShopToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `shop-toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 1100);
+            }
+
+
+            const SAMPLE_DATA_SETS = {
+                animals: [
+                    ['cat', 'mèo'], ['dog', 'chó'], ['bird', 'chim'], ['fish', 'cá'],
+                    ['rabbit', 'thỏ'], ['tiger', 'hổ'], ['monkey', 'khỉ'], ['elephant', 'voi']
+                ],
+                classroom: [
+                    ['book', 'sách'], ['pen', 'bút'], ['desk', 'bàn học'], ['chair', 'ghế'],
+                    ['board', 'bảng'], ['teacher', 'giáo viên'], ['student', 'học sinh'], ['bag', 'cặp sách']
+                ],
+                actions: [
+                    ['run', 'chạy'], ['jump', 'nhảy'], ['read', 'đọc'], ['write', 'viết'],
+                    ['listen', 'nghe'], ['speak', 'nói'], ['draw', 'vẽ'], ['sing', 'hát']
+                ]
+            };
+
+            function fillSampleData(sampleKey) {
+                const rows = SAMPLE_DATA_SETS[sampleKey] || SAMPLE_DATA_SETS.animals;
+                while (currentRowCount < rows.length) { createGridRow(currentRowCount + 1); }
+                for (let r = 1; r <= currentRowCount; r++) {
+                    const pair = rows[r - 1] || ['', ''];
+                    const colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`);
+                    const colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`);
+                    const checkbox = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`);
+                    if (colA) { colA.value = pair[0]; colA.dispatchEvent(new Event('input')); }
+                    if (colB) { colB.value = pair[1]; colB.dispatchEvent(new Event('input')); }
+                    if (checkbox) checkbox.checked = Boolean(pair[0] && pair[1]);
+                }
+                document.querySelectorAll('.sample-data-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.sample === sampleKey));
+                updateSetupStatus();
+                showShopToast(`Loaded ${rows.length} ${sampleKey} questions`, 'success');
+            }
+
             const uploadInput = document.getElementById('image-upload-input');
             const uploadBtn = document.getElementById('btn-upload-images');
             const clearUploadBtn = document.getElementById('btn-clear-uploaded-images');
@@ -193,12 +287,18 @@ window.useBasicSkill = useBasicSkill;
                         previewImg.removeAttribute('src');
                         this.style.paddingRight = '8px';
                     }
+                    updateSetupStatus();
                 });
 
                 input.addEventListener('keydown', function(e) {
                     if(activeKeybindInput) return; 
                     const row = parseInt(this.dataset.row); 
                     const col = this.dataset.col; 
+                    if (e.key === 'Tab' && !e.shiftKey && col === 'colB' && row === currentRowCount) {
+                        e.preventDefault();
+                        addDataRow({ focus: true });
+                        return;
+                    }
                     let nextRow = row; let nextInput = null;
                     if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); nextRow = row < currentRowCount ? row + 1 : row; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
                     else if (e.key === 'ArrowUp') { e.preventDefault(); nextRow = row > 1 ? row - 1 : 1; nextInput = document.querySelector(`.excel-input[data-row="${nextRow}"][data-col="${col}"]`); }
@@ -228,31 +328,25 @@ window.useBasicSkill = useBasicSkill;
                 `;
                 tbody.appendChild(tr);
                 tr.querySelectorAll('.excel-input').forEach(attachInputListeners);
+                tr.querySelector('.custom-checkbox')?.addEventListener('change', updateSetupStatus);
                 currentRowCount = i;
+                updateSetupStatus();
+            }
+
+            function addDataRow({ focus = true } = {}) {
+                createGridRow(currentRowCount + 1);
+                if (focus) {
+                    document.querySelector(`.excel-input[data-col="colA"][data-row="${currentRowCount}"]`)?.focus();
+                }
+                updateSetupStatus();
             }
 
             for (let i = 1; i <= 5; i++) { createGridRow(i); }
             updateGridHeaders();
+            document.getElementById('btn-add-row')?.addEventListener('click', () => addDataRow());
 
-            document.getElementById('btn-auto-fill').addEventListener('click', () => {
-                const targetCol = document.getElementById('autofill-target').value;
-                const start = parseInt(document.getElementById('autofill-start').value);
-                const end = parseInt(document.getElementById('autofill-end').value);
-                
-                if(isNaN(start) || isNaN(end) || start > end) { alert("Khoảng số không hợp lệ!"); return; }
-                const count = end - start + 1;
-                while (currentRowCount < count) { createGridRow(currentRowCount + 1); }
-                let currentNum = start;
-                for(let r = 1; r <= count; r++) {
-                    const checkbox = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`);
-                    if(targetCol === 'colC') {
-                        if(checkbox) checkbox.checked = true;
-                    } else {
-                        const input = document.querySelector(`.excel-input[data-col="${targetCol}"][data-row="${r}"]`);
-                        if(input) { input.value = currentNum; input.dispatchEvent(new Event('input')); currentNum++; }
-                        if(checkbox) checkbox.checked = true;
-                    }
-                }
+            document.querySelectorAll('.sample-data-btn').forEach(btn => {
+                btn.addEventListener('click', () => fillSampleData(btn.dataset.sample));
             });
 
             document.getElementById('btn-clear-data').addEventListener('click', () => {
@@ -294,18 +388,85 @@ window.useBasicSkill = useBasicSkill;
                 if(!val) return "";
                 const isUrl = val.startsWith('http') || val.startsWith('data:');
                 const tenorMatch = val.match(/tenor\.com\/view\/.*-(\d+)$/);
-                if (tenorMatch) { return `<iframe src="https://tenor.com/embed/${tenorMatch[1]}" width="100%" height="100%" frameBorder="0" scrolling="no" class="pointer-events-none bg-black" allowtransparency="true"></iframe>`; } 
-                else if (isUrl) { return `<img src="${val}" class="w-full h-full object-cover pointer-events-none bg-black" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';" />`; } 
-                else { return `<img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';}" class="w-full h-full object-cover pointer-events-none bg-black" />`; }
+                if (tenorMatch) { return `<div class="avatar-media-wrap"><iframe src="https://tenor.com/embed/${tenorMatch[1]}" width="100%" height="100%" frameBorder="0" scrolling="no" class="avatar-media pointer-events-none bg-black" allowtransparency="true"></iframe></div>`; } 
+                else if (isUrl) { return `<div class="avatar-media-wrap"><img src="${val}" class="avatar-media pointer-events-none bg-black" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';" /></div>`; } 
+                else { return `<div class="avatar-media-wrap"><img src="Hero/${val}.png" onerror="if(this.src.includes('.png')){this.src='Hero/${val}.jpg'}else{this.onerror=null;this.src='${DEFAULT_AVATAR_SVG}';}" class="avatar-media pointer-events-none bg-black" /></div>`; }
             }
+
+            const GAME_PRESETS = {
+                classic: { label: 'PvP', quizMode: 'sequential', bossHp: 100, heroHp: 100, p1Name: 'P1', p2Name: 'P2', stunTime: 2, timerSeconds: 180, rewardMultiplier: 1, shopEnabled: false },
+                raid: { label: 'Boss Raid', quizMode: 'random', bossHp: 1600, heroHp: 100, p1Name: 'P1', p2Name: 'BOSS', stunTime: 2.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true },
+                god: { label: 'God Mode', quizMode: 'random', bossHp: 1600, heroHp: 100, p1Name: 'P1', p2Name: 'BOSS', stunTime: 0.5, timerSeconds: 240, rewardMultiplier: 1.35, shopEnabled: true, godMode: true }
+            };
 
             function safeSetText(elementId, textValue) {
                 const el = document.getElementById(elementId);
                 if (el && textValue) el.innerText = textValue;
             }
 
+            function isShopEnabledForCurrentSettings() {
+                const shopToggle = document.getElementById('setting_shop_enabled');
+                if (shopToggle) return !!shopToggle.checked;
+                const preset = GAME_PRESETS[document.getElementById('setting_game_preset')?.value || 'classic'] || GAME_PRESETS.classic;
+                return !!preset.shopEnabled;
+            }
+
+            function updateShopEnabledUI(isEnabled = isShopEnabledForCurrentSettings()) {
+                document.body.classList.toggle('shop-enabled', !!isEnabled);
+            }
+
+            function syncShopKeyHints() {
+                const mapping = {
+                    key_p1_shop_mana: 'ui-key-p1-shop-mana',
+                    key_p1_shop_shield: 'ui-key-p1-shop-shield',
+                    key_p1_shop_double: 'ui-key-p1-shop-double',
+                    key_p2_shop_mana: 'ui-key-p2-shop-mana',
+                    key_p2_shop_shield: 'ui-key-p2-shop-shield',
+                    key_p2_shop_double: 'ui-key-p2-shop-double'
+                };
+                Object.entries(mapping).forEach(([saveKey, hintId]) => {
+                    const input = document.querySelector(`[data-save="${saveKey}"]`);
+                    safeSetText(hintId, input?.value || '');
+                });
+            }
+
+            function applyPreset(presetId, { updateInputs = true } = {}) {
+                const presetKey = GAME_PRESETS[presetId] ? presetId : 'classic';
+                const preset = GAME_PRESETS[presetKey];
+                const hidden = document.getElementById('setting_game_preset');
+                if (hidden) hidden.value = presetKey;
+                document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.preset === presetKey));
+                if (updateInputs) {
+                    const quizMode = document.getElementById('setting_quiz_mode');
+                    const bossHp = document.getElementById('boss-max-hp');
+                    const heroHp = document.getElementById('hero-max-hp');
+                    const stunTime = document.getElementById('setting_stun_time');
+                    const shopToggle = document.getElementById('setting_shop_enabled');
+                    const p1NameInput = document.getElementById('p1-name-input');
+                    const p2NameInput = document.getElementById('p2-name-input');
+                    if (quizMode) quizMode.value = preset.quizMode;
+                    if (bossHp) bossHp.value = preset.bossHp;
+                    if (heroHp) heroHp.value = preset.heroHp;
+                    if (stunTime) stunTime.value = preset.stunTime;
+                    if (shopToggle) shopToggle.checked = !!preset.shopEnabled;
+                    if (p1NameInput) p1NameInput.value = preset.p1Name || 'P1';
+                    if (p2NameInput) p2NameInput.value = preset.p2Name || 'P2';
+                }
+                const hudMode = document.getElementById('hud-mode-label');
+                if (hudMode) hudMode.innerText = preset.label;
+                updateShopEnabledUI();
+            }
+
             const svgTick = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(34,197,94,0.8)]"><svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div>`;
             const svgCross = `<div class="bg-white rounded-full p-2 shadow-[0_0_20px_rgba(239,68,68,0.8)]"><svg class="w-16 h-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></div>`;
+
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+            });
+            document.querySelectorAll('[data-save^="key_"]').forEach(inp => {
+                inp.addEventListener('change', syncShopKeyHints);
+            });
+            document.getElementById('setting_shop_enabled')?.addEventListener('change', () => updateShopEnabledUI());
 
             document.getElementById('save-and-close-btn').addEventListener('click', function() {
                 try {
@@ -329,18 +490,27 @@ window.useBasicSkill = useBasicSkill;
                     safeSetText('ui-key-p2-s1', savedKeys.key_p2_s1); safeSetText('ui-key-p2-s2', savedKeys.key_p2_s2);
                     safeSetText('ui-key-p2-s3', savedKeys.key_p2_s3); safeSetText('ui-key-p2-ult', savedKeys.key_p2_ult);
 
+                    safeSetText('ui-key-p1-shop-mana', savedKeys.key_p1_shop_mana);
+                    safeSetText('ui-key-p1-shop-shield', savedKeys.key_p1_shop_shield);
+                    safeSetText('ui-key-p1-shop-double', savedKeys.key_p1_shop_double);
+                    safeSetText('ui-key-p2-shop-mana', savedKeys.key_p2_shop_mana);
+                    safeSetText('ui-key-p2-shop-shield', savedKeys.key_p2_shop_shield);
+                    safeSetText('ui-key-p2-shop-double', savedKeys.key_p2_shop_double);
+
                     const p1Av = document.getElementById('p1-avatar-input').value;
                     const p2Av = document.getElementById('p2-avatar-input').value;
-                    if(p1Av) { let avHtml = getAvatarHtml(p1Av); document.getElementById('p1-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p1-avatar').innerHTML = avHtml; }
-                    if(p2Av) { let avHtml = getAvatarHtml(p2Av); document.getElementById('p2-avatar-inner').innerHTML = avHtml; document.getElementById('vs-p2-avatar').innerHTML = avHtml; }
-
-                    let gridData = [];
-                    for (let r = 1; r <= currentRowCount; r++) {
-                        let colA = document.querySelector(`.excel-input[data-col="colA"][data-row="${r}"]`)?.value;
-                        let colB = document.querySelector(`.excel-input[data-col="colB"][data-row="${r}"]`)?.value;
-                        let active = document.querySelector(`.custom-checkbox[data-col="active"][data-row="${r}"]`)?.checked;
-                        if (colA && colB && active) { gridData.push({ cotA: colA, cotB: colB, active: active }); }
+                    if(p1Av) {
+                        let avHtml = getAvatarHtml(p1Av);
+                        document.getElementById('p1-avatar-inner').innerHTML = avHtml.replace(/^<div class="avatar-media-wrap">|<\/div>$/g, '');
+                        document.getElementById('vs-p1-avatar').innerHTML = avHtml;
                     }
+                    if(p2Av) {
+                        let avHtml = getAvatarHtml(p2Av);
+                        document.getElementById('p2-avatar-inner').innerHTML = avHtml.replace(/^<div class="avatar-media-wrap">|<\/div>$/g, '');
+                        document.getElementById('vs-p2-avatar').innerHTML = avHtml;
+                    }
+
+                    let gridData = collectActiveGridData();
                     
                     saveSettings(gridData);
                     
@@ -417,8 +587,9 @@ window.useBasicSkill = useBasicSkill;
                     }
                 }, MAIN_THEME_DELAY_MS);
 
-                window.GameplayManager.state.p1.name = document.getElementById('p1-name-input').value || 'HERO';
-                window.GameplayManager.state.p2.name = document.getElementById('p2-name-input').value || 'BOSS';
+                const activePreset = GAME_PRESETS[window.GameplayManager.state.preset] || GAME_PRESETS.classic;
+                window.GameplayManager.state.p1.name = document.getElementById('p1-name-input').value || activePreset.p1Name || 'P1';
+                window.GameplayManager.state.p2.name = document.getElementById('p2-name-input').value || activePreset.p2Name || 'P2';
                 
                 document.getElementById('p1-name-input').dispatchEvent(new Event('change'));
                 document.getElementById('p2-name-input').dispatchEvent(new Event('change'));
@@ -437,7 +608,12 @@ window.useBasicSkill = useBasicSkill;
                         el.dispatchEvent(new Event('change')); 
                     }
                 });
+                applyPreset(document.getElementById('setting_game_preset')?.value || 'classic', { updateInputs: false });
+                updateShopEnabledUI();
+            } else {
+                applyPreset('classic');
             }
+            syncShopKeyHints();
             if (loaded.gridData && loaded.gridData.length > 0) {
                 const tbody = document.getElementById('grid-body');
                 tbody.innerHTML = ''; 
@@ -449,6 +625,7 @@ window.useBasicSkill = useBasicSkill;
                     document.querySelector(`.custom-checkbox[data-col="active"][data-row="${index + 1}"]`).checked = row.active;
                 });
             }
+            updateSetupStatus();
 
             // =========================================================================
             // --- [MODULE: GAMEPLAY_MANAGER_CORE] ---
@@ -457,8 +634,16 @@ window.useBasicSkill = useBasicSkill;
                 state: gameState,
                 suddenDeathTimer: null,
                 SKILL_POOL: [
-                    { id: 'meteor', icon: '☄️' },
-                    { id: 'kamehameha', icon: '🌊' }
+                    { id: 'copycat', icon: '👁️', ownerKey: 'skill_1_owner' },
+                    { id: 'shuriken', icon: '🥷', ownerKey: 'skill_2_owner' },
+                    { id: 'meteor', icon: '☄️', ownerKey: 'skill_3_owner' },
+                    { id: 'thunder', icon: '⚡', ownerKey: 'skill_4_owner' },
+                    { id: 'junk', icon: '🍔', ownerKey: 'skill_5_owner' },
+                    { id: 'freeze', icon: '❄️', ownerKey: 'skill_6_owner' },
+                    { id: 'mirror', icon: '🛡️', ownerKey: 'skill_7_owner' },
+                    { id: 'rest', icon: '💤', ownerKey: 'skill_8_owner' },
+                    { id: 'fireball', icon: '🔥', ownerKey: 'skill_9_owner' },
+                    { id: 'kamehameha', icon: '🌊', ownerKey: 'skill_10_owner' }
                 ],
 
                 initGame: function(settingsData, gridData) {
@@ -466,21 +651,33 @@ window.useBasicSkill = useBasicSkill;
                     this.state.totalQuestions = gridData.length;
                     this.state.questionsPassed = 1;
                     
-                    this.state.mode = document.getElementById('setting_quiz_mode')?.value || 'sequential';
-                    this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || 2) * 1000;
+                    this.state.preset = document.getElementById('setting_game_preset')?.value || 'classic';
+                    const activePreset = GAME_PRESETS[this.state.preset] || GAME_PRESETS.classic;
+                    this.state.mode = document.getElementById('setting_quiz_mode')?.value || activePreset.quizMode || 'sequential';
+                    const hudMode = document.getElementById('hud-mode-label');
+                    if (hudMode) hudMode.innerText = activePreset.label;
+                    this.state.shopEnabled = isShopEnabledForCurrentSettings();
+                    updateShopEnabledUI(this.state.shopEnabled);
+                    this.state.stunTime = (parseFloat(document.getElementById('setting_stun_time')?.value) || activePreset.stunTime || 2) * 1000;
                     
-                    this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || 100;
-                    this.state.p2.maxHp = this.state.p2.hp = parseInt(document.getElementById('boss-max-hp')?.value) || 1000;
+                    this.state.p1.maxHp = this.state.p1.hp = parseInt(document.getElementById('hero-max-hp')?.value) || activePreset.heroHp || 100;
+                    this.state.p2.maxHp = this.state.p2.hp = parseInt(document.getElementById('boss-max-hp')?.value) || activePreset.bossHp || 100;
                     this.state.p1.mana = 0; this.state.p2.mana = 0;
+                    this.state.p1.cash = 0; this.state.p2.cash = 0;
+                    this.state.p1.streak = 0; this.state.p2.streak = 0;
+                    this.state.p1.bestStreak = 0; this.state.p2.bestStreak = 0;
+                    this.state.p1.multiplier = activePreset.rewardMultiplier || 1; this.state.p2.multiplier = activePreset.rewardMultiplier || 1;
+                    this.state.p1.multiplierTurns = 0; this.state.p2.multiplierTurns = 0;
                     this.state.p1.isStunned = false; this.state.p2.isStunned = false;
                     this.state.p1.isFrozen = false; this.state.p2.isFrozen = false;
                     this.state.p1.queue = []; this.state.p2.queue = [];
+                    this.state.p1.lastUltimateAt = 0; this.state.p2.lastUltimateAt = 0;
                     
                     this.state.wrongPool = [];
                     this.state.isRetryPhase = false;
                     this.state.isTransitioning = false;
-
                     this.buildDecks();
+                    this.applyGodModeResources();
                     this.refreshActivePool();
                     this.updateUI();
                     
@@ -489,22 +686,69 @@ window.useBasicSkill = useBasicSkill;
                 },
 
                 updateUI: function() {
+                    this.applyGodModeResources();
                     updateUI(this.state);
                 },
 
+                isGodMode: function() {
+                    return !!(GAME_PRESETS[this.state.preset]?.godMode);
+                },
+
+                applyGodModeResources: function() {
+                    if (!this.isGodMode()) return;
+                    ['p1', 'p2'].forEach(playerPrefix => {
+                        const player = this.state[playerPrefix];
+                        if (!player) return;
+                        player.mana = 10;
+                        player.cash = 9999;
+                        this.ensureUltimateQueue(playerPrefix);
+                    });
+                },
+
+                getAvailableSkillPool: function(playerPrefix) {
+                    const fallback = this.SKILL_POOL.filter(skill => skill.id === 'meteor' || skill.id === 'kamehameha');
+                    const pool = this.SKILL_POOL.filter(skill => {
+                        const owner = document.querySelector(`[data-save="${skill.ownerKey}"]`)?.value || 'both';
+                        return owner === 'both' || owner === playerPrefix;
+                    });
+                    return pool.length > 0 ? pool : fallback;
+                },
+
+                shuffleSkillPool: function(playerPrefix) {
+                    const deck = [...this.getAvailableSkillPool(playerPrefix)];
+                    for (let i = deck.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [deck[i], deck[j]] = [deck[j], deck[i]];
+                    }
+                    return deck;
+                },
+
                 buildDecks: function() {
-                    // Logic xào bài vào Giỏ (Deck)
-                    this.state.p1.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
-                    this.state.p2.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                    // Ultimate deck mirrors the Skills tab: shuffle eligible skills, then consume sequentially before recycling.
+                    this.state.p1.deck = this.shuffleSkillPool('p1');
+                    this.state.p2.deck = this.shuffleSkillPool('p2');
                 },
 
                 drawSkill: function(playerPrefix) {
                     let player = this.state[playerPrefix];
-                    // Nếu rút hết bài thì nạp lại và xáo lên
                     if (player.deck.length === 0) {
-                        player.deck = [...this.SKILL_POOL].sort(() => Math.random() - 0.5);
+                        player.deck = this.shuffleSkillPool(playerPrefix);
                     }
                     return player.deck.shift();
+                },
+
+                ensureUltimateQueue: function(playerPrefix) {
+                    const player = this.state[playerPrefix];
+                    if (!player) return;
+                    const targetSlots = Math.min(2, Math.floor((player.mana || 0) / 5));
+                    while (player.queue.length < targetSlots) {
+                        const drawnSkill = this.drawSkill(playerPrefix);
+                        if (!drawnSkill) break;
+                        player.queue.push(drawnSkill);
+                    }
+                    if (player.queue.length > targetSlots) {
+                        player.queue = player.queue.slice(0, targetSlots);
+                    }
                 },
 
                 startGame: function() {
@@ -517,8 +761,9 @@ window.useBasicSkill = useBasicSkill;
                 startSuddenDeathTimer: function() {
                     if (this.suddenDeathTimer) clearInterval(this.suddenDeathTimer);
                     
-                    let limitMinutes = parseFloat(document.getElementById('sudden-death-time')?.value) || 3;
-                    let limitSec = limitMinutes * 60;
+                    const activePreset = GAME_PRESETS[this.state.preset] || GAME_PRESETS.classic;
+                    let limitMinutes = parseFloat(document.getElementById('sudden-death-time')?.value) || (activePreset.timerSeconds / 60) || 3;
+                    let limitSec = activePreset.timerSeconds || (limitMinutes * 60);
                     let sdDmg = parseFloat(document.getElementById('sudden-death-dmg')?.value) || 5;
                     let timerEl = document.getElementById('quiz-timer');
                     
@@ -707,21 +952,44 @@ window.useBasicSkill = useBasicSkill;
                 },
 
                 addMana: function(playerPrefix, amount) {
+                    if (this.isGodMode()) {
+                        this.applyGodModeResources();
+                        this.updateUI();
+                        return;
+                    }
                     let player = this.state[playerPrefix];
                     let oldCapacity = Math.floor(player.mana / 5);
                     player.mana = Math.min(10, player.mana + amount);
                     let newCapacity = Math.floor(player.mana / 5);
 
-                    if (newCapacity > oldCapacity) {
-                        let skillsToDraw = newCapacity - oldCapacity;
-                        for(let i=0; i<skillsToDraw; i++) {
-                            if (player.queue.length < 2) {
-                                let drawnSkill = this.drawSkill(playerPrefix);
-                                player.queue.push(drawnSkill);
-                                playSound('draw_skill');
-                            }
-                        }
+                    const beforeQueue = player.queue.length;
+                    this.ensureUltimateQueue(playerPrefix);
+                    if (player.queue.length > beforeQueue) playSound('draw_skill');
+                    this.updateUI();
+                },
+
+                buyUpgrade: function(playerPrefix, upgradeId) {
+                    const player = this.state[playerPrefix];
+                    if (!this.state.shopEnabled) {
+                        showShopToast('Shop is disabled for this match', 'warning');
+                        return;
                     }
+                    if (!player || !this.state.isPlaying) return;
+                    const upgrades = {
+                        mana: { cost: 20, label: '+2 Mana', apply: () => { this.addMana(playerPrefix, 2); } },
+                        shield: { cost: 30, label: '+25 Shield', apply: () => { player.shield = Math.min(99, (player.shield || 0) + 25); } },
+                        double: { cost: 40, label: '2x Cash x3', apply: () => { player.multiplier = 2; player.multiplierTurns = 3; } }
+                    };
+                    const upgrade = upgrades[upgradeId];
+                    if (!upgrade) return;
+                    if ((player.cash || 0) < upgrade.cost) {
+                        showShopToast(`${player.name}: need $${upgrade.cost}`, 'warning');
+                        return;
+                    }
+                    player.cash -= upgrade.cost;
+                    upgrade.apply();
+                    this.applyGodModeResources();
+                    showShopToast(`${player.name} bought ${upgrade.label}!`);
                     this.updateUI();
                 },
 
@@ -747,6 +1015,18 @@ window.useBasicSkill = useBasicSkill;
                         icon.classList.replace('scale-0', 'scale-100');
                         
                         playSound('correct');
+                        player.streak = (player.streak || 0) + 1;
+                        player.bestStreak = Math.max(player.bestStreak || 0, player.streak);
+                        const streakBonus = Math.floor(player.streak / 3) * 5;
+                        const activeMultiplier = player.multiplier || 1;
+                        const cashReward = Math.round((10 + streakBonus) * activeMultiplier);
+                        player.cash = (player.cash || 0) + cashReward;
+                        if ((player.multiplierTurns || 0) > 0) {
+                            player.multiplierTurns -= 1;
+                            if (player.multiplierTurns <= 0) player.multiplier = 1;
+                        }
+                        const multiplierText = activeMultiplier > 1 ? ` x${activeMultiplier}` : '';
+                        showAnswerFeedback(selectedAnswerIndex, `+$${cashReward}${multiplierText} | 🔥${player.streak}`, 'correct');
                         this.addMana(playerPrefix, 1);
                         this.state.questionsPassed++; // Tăng câu hỏi khi đúng
                         
@@ -759,9 +1039,11 @@ window.useBasicSkill = useBasicSkill;
                         icon.classList.replace('scale-0', 'scale-100');
 
                         playSound('wrong');
+                        player.streak = 0;
+                        showAnswerFeedback(selectedAnswerIndex, 'Stunned! Streak reset', 'wrong');
 
                         let oldCapacity = Math.floor(player.mana / 5);
-                        player.mana = Math.max(0, player.mana - 1);
+                        if (!this.isGodMode()) player.mana = Math.max(0, player.mana - 1);
                         let newCapacity = Math.floor(player.mana / 5);
                         
                         if (newCapacity < oldCapacity && player.queue.length > newCapacity) {
@@ -792,6 +1074,61 @@ window.useBasicSkill = useBasicSkill;
                     }
                 },
 
+                castUltimateSkill: function(skillToUse, playerPrefix, opponentPrefix) {
+                    const targetBox = document.getElementById(`${opponentPrefix}-avatar-box`);
+                    const casterBox = document.getElementById(`${playerPrefix}-avatar-box`);
+                    if (!skillToUse) return;
+                    this.state[playerPrefix].lastUltimateSkillId = skillToUse.id;
+
+                    if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); }
+                    else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
+                    else if (skillToUse.id === 'shuriken') {
+                        const hits = Math.min(parseInt(document.querySelector('[data-save="skill_2_multi"]')?.value) || 3, 5);
+                        const dmgPerHit = parseFloat(document.getElementById(playerPrefix === 'p1' ? 'hero-mana-atk' : 'boss-mana-atk')?.value) || 10;
+                        spawnFloatingIcons(targetBox, ['🥷', '✦', '✧'], hits, 700, 0.7, 1.5, 90);
+                        window.takeDamage(opponentPrefix, dmgPerHit * hits);
+                    }
+                    else if (skillToUse.id === 'thunder') {
+                        const dmg = parseFloat(document.querySelector('[data-save="skill_4_dmg"]')?.value) || 20;
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_4_time"]')?.value) || 3;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'stun', seconds * 1000, true);
+                        window.takeDamage(opponentPrefix, dmg);
+                    }
+                    else if (skillToUse.id === 'junk') {
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_5_time"]')?.value) || 5;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'poison', seconds * 1000, false);
+                    }
+                    else if (skillToUse.id === 'freeze') {
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_6_time"]')?.value) || 4;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'freeze', seconds * 1000, true);
+                    }
+                    else if (skillToUse.id === 'mirror') {
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_7_time"]')?.value) || 5;
+                        triggerStatusEffect(casterBox, playerPrefix, 'reflect', seconds * 1000, false);
+                        this.state[playerPrefix].reflectUntil = Date.now() + seconds * 1000;
+                    }
+                    else if (skillToUse.id === 'rest') {
+                        const shield = parseFloat(document.querySelector('[data-save="skill_8_shield"]')?.value) || 100;
+                        const seconds = parseFloat(document.querySelector('[data-save="skill_8_time"]')?.value) || 5;
+                        this.state[playerPrefix].shield = Math.min((this.state[playerPrefix].shield || 0) + shield, shield);
+                        triggerStatusEffect(casterBox, playerPrefix, 'freeze', seconds * 1000, false);
+                        this.updateUI();
+                    }
+                    else if (skillToUse.id === 'fireball') {
+                        const dmg = parseFloat(document.querySelector('[data-save="skill_9_dmg"]')?.value) || 100;
+                        triggerStatusEffect(targetBox, opponentPrefix, 'burn', 1200, true);
+                        window.takeDamage(opponentPrefix, dmg);
+                    }
+                    else if (skillToUse.id === 'copycat') {
+                        const copied = this.state[opponentPrefix].lastUltimateSkillId;
+                        if (copied && copied !== 'copycat') {
+                            this.castUltimateSkill({ id: copied }, playerPrefix, opponentPrefix);
+                        } else {
+                            playMeteorShower(playerPrefix, opponentPrefix);
+                        }
+                    }
+                },
+
                 handleSkill: function(playerPrefix) {
                     if (!this.state.isPlaying) return;
                     let player = this.state[playerPrefix];
@@ -800,16 +1137,22 @@ window.useBasicSkill = useBasicSkill;
                     if (player.isFrozen) { playSound('freeze'); return; }
                     
                     if (player.queue.length > 0 && player.mana >= 5) {
+                        const now = Date.now();
+                        const ultCooldownMs = this.isGodMode() ? 500 : 0;
+                        if (ultCooldownMs && player.lastUltimateAt && now - player.lastUltimateAt < ultCooldownMs) return;
+
                         let skillToUse = player.queue.shift();
-                        player.mana -= 5;
+                        if (!this.isGodMode()) player.mana -= 5;
+                        player.lastUltimateAt = now;
+                        this.ensureUltimateQueue(playerPrefix);
+                        this.applyGodModeResources();
                         this.updateUI();
 
                         // ==========================================
                         // ⚓ [NEO 4]: GỌI TÊN SKILL (KÍCH HOẠT)
                         // Khi có skill mới, thêm 1 dòng "else if" ở đây:
                         // ==========================================
-                        if (skillToUse.id === 'meteor') { playMeteorShower(playerPrefix, opponentPrefix); } 
-                        else if (skillToUse.id === 'kamehameha') { playKamehamehaAnimation(playerPrefix, opponentPrefix); }
+                        this.castUltimateSkill(skillToUse, playerPrefix, opponentPrefix);
                         // ✂️👇 THÊM ELSE IF CHO SKILL MỚI VÀO ĐÂY 👇✂️
 
                         // ==========================================
@@ -865,6 +1208,17 @@ window.useBasicSkill = useBasicSkill;
                 if (key === p2_s2) { window.triggerClickSkill('p2', 'atk'); return; }
                 if (key === p2_s1) { window.triggerClickSkill('p2', 'def'); return; }
                 if (key === p2_s3) { window.triggerClickSkill('p2', 'heal'); return; }
+
+                const shopKeys = [
+                    ['p1', 'mana', document.getElementById('ui-key-p1-shop-mana')?.innerText.trim().toUpperCase()],
+                    ['p1', 'shield', document.getElementById('ui-key-p1-shop-shield')?.innerText.trim().toUpperCase()],
+                    ['p1', 'double', document.getElementById('ui-key-p1-shop-double')?.innerText.trim().toUpperCase()],
+                    ['p2', 'mana', document.getElementById('ui-key-p2-shop-mana')?.innerText.trim().toUpperCase()],
+                    ['p2', 'shield', document.getElementById('ui-key-p2-shop-shield')?.innerText.trim().toUpperCase()],
+                    ['p2', 'double', document.getElementById('ui-key-p2-shop-double')?.innerText.trim().toUpperCase()]
+                ];
+                const shopMatch = shopKeys.find(([, , shopKey]) => shopKey && key === shopKey);
+                if (shopMatch) { window.triggerClickShop(shopMatch[0], shopMatch[1]); return; }
 
                 let p1Index = p1_keys.indexOf(key);
                 if (p1Index !== -1) { window.GameplayManager.handlePlayerAnswer('p1', p1Index); return; }
